@@ -7,10 +7,15 @@ import Date.Format exposing (format)
 import List
 
 
-type Feeding
-    = LeftBreast Date
-    | RightBreast Date
-    | Done Date
+type Event
+    = LeftBreast
+    | RightBreast
+    | Bottle
+    | Done
+
+
+type alias Feeding =
+    ( Date, Event )
 
 
 type alias Model =
@@ -18,21 +23,21 @@ type alias Model =
 
 
 renderFeeding : Feeding -> Html
-renderFeeding feeding =
+renderFeeding ( date, event ) =
     let
-        showDate date =
-            format "%d/%m/%Y %I:%M %P" date
+        ( message, icon ) =
+            case event of
+                LeftBreast ->
+                    ( "Left", "caret left" )
 
-        ( message, date, icon ) =
-            case feeding of
-                LeftBreast date ->
-                    ( "Left", date, "caret left" )
+                RightBreast ->
+                    ( "Right", "caret right" )
 
-                RightBreast date ->
-                    ( "Right", date, "caret right" )
+                Bottle ->
+                    ( "Bottle", "caret up" )
 
-                Done date ->
-                    ( "Finished", date, "star" )
+                Done ->
+                    ( "Finished", "star" )
     in
         tr
             []
@@ -45,7 +50,7 @@ renderFeeding feeding =
                 ]
             , td
                 []
-                [ text <| showDate date ]
+                [ text <| format "%d/%m/%Y %I:%M %P" date ]
             ]
 
 
@@ -120,4 +125,4 @@ view feedings =
 
 main : Html
 main =
-    view [ LeftBreast (Date.fromTime 1451604066913), RightBreast (Date.fromTime 1451604066913) ]
+    view [ ( Date.fromTime 1451604066913, LeftBreast ), ( Date.fromTime 1451604066913, RightBreast ) ]
