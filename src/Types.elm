@@ -12,7 +12,3 @@ type Action
 
 type alias Feeding =
     ( Date.Date, Action )
-
-
-type alias Model =
-    List Feeding

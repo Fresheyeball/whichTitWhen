@@ -5,7 +5,37 @@ import Html.Attributes as Attr
 import Html.Events as Evt
 import Date.Format exposing (format)
 import Types exposing (..)
+import String exposing (join)
+import Time
 import Messanger
+
+
+css : Html
+css =
+    let
+        link' package =
+            let
+                url =
+                    "http://oss.maxcdn.com/"
+                        ++ "semantic-ui/2.1.7/"
+                        ++ package
+                        ++ ".min.css"
+            in
+                node
+                    "link"
+                    [ Attr.rel "stylesheet"
+                    , Attr.type' "text/css"
+                    , Attr.href url
+                    ]
+                    []
+    in
+        div
+            []
+            [ link' "semantic"
+            , link' "components/table"
+            , link' "components/icon"
+            , link' "components/menu"
+            ]
 
 
 renderFeeding : Feeding -> Html
@@ -42,40 +72,17 @@ renderFeeding ( date, action ) =
 
 renderFeedings : List Feeding -> Html
 renderFeedings feedings =
-    table
-        [ Attr.class "ui celled striped table" ]
-        [ tbody
-            []
-            (List.map renderFeeding feedings)
+    div
+        [ Attr.class "ui main text container"
+        , Attr.style [ ( "margin-top", "50px" ) ]
         ]
-
-
-css : Html
-css =
-    let
-        link' package =
-            let
-                url =
-                    "http://oss.maxcdn.com/"
-                        ++ "semantic-ui/2.1.7/"
-                        ++ package
-                        ++ ".min.css"
-            in
-                node
-                    "link"
-                    [ Attr.rel "stylesheet"
-                    , Attr.type' "text/css"
-                    , Attr.href url
-                    ]
-                    []
-    in
-        div
-            []
-            [ link' "semantic"
-            , link' "components/table"
-            , link' "components/icon"
-            , link' "components/menu"
+        [ table
+            [ Attr.class "ui celled striped table" ]
+            [ tbody
+                []
+                (List.map renderFeeding feedings)
             ]
+        ]
 
 
 toolBar : Html
@@ -97,15 +104,33 @@ toolBar =
             ]
 
 
-view : Model -> Html
-view feedings =
+timer : Time.Time -> Html
+timer time =
+    let
+        showTime = toString << floor
+
+        formated =
+            join
+                ":"
+                [ showTime
+                    (Time.inHours time)
+                , showTime
+                    (Time.inMinutes time)
+                , showTime
+                    (Time.inSeconds time)
+                ]
+    in
+        div
+            [ Attr.class "ui item fixed bottom header" ]
+            [ text formated ]
+
+
+view : Time.Time -> List Feeding -> Html
+view since feedings =
     div
         []
         [ css
         , toolBar
-        , div
-            [ Attr.class "ui main text container"
-            , Attr.style [ ( "margin-top", "50px" ) ]
-            ]
-            [ renderFeedings feedings ]
+        , renderFeedings feedings
+        , timer since
         ]

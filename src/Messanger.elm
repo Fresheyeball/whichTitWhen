@@ -2,6 +2,7 @@ module Messanger (input, output) where
 
 import Signal exposing (Mailbox, mailbox)
 import Types exposing (Action, Feeding)
+import Maybe
 import Time
 import Date
 
@@ -20,12 +21,10 @@ output : Signal (Maybe Feeding)
 output =
     let
         transform ( time, mfeeding ) =
-            case mfeeding of
-                Nothing ->
-                    Nothing
-
-                Just feeding ->
-                    Just ( Date.fromTime time, feeding )
+            Maybe.map
+                (\feeding -> ( Date.fromTime time, feeding ))
+                mfeeding
     in
-        Time.timestamp (.signal messanger)
-            |> Signal.map transform
+        Signal.map
+            transform
+            (Time.timestamp (.signal messanger))
