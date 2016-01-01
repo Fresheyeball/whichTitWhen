@@ -7,7 +7,7 @@ import Date.Format exposing (format)
 import List
 
 
-type Event
+type Action
     = LeftBreast
     | RightBreast
     | Bottle
@@ -15,7 +15,7 @@ type Event
 
 
 type alias Feeding =
-    ( Date, Event )
+    ( Date, Action )
 
 
 type alias Model =
@@ -23,10 +23,10 @@ type alias Model =
 
 
 renderFeeding : Feeding -> Html
-renderFeeding ( date, event ) =
+renderFeeding ( date, action ) =
     let
         ( message, icon ) =
-            case event of
+            case action of
                 LeftBreast ->
                     ( "Left", "caret left" )
 
