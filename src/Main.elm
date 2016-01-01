@@ -1,11 +1,11 @@
 module Main (..) where
 
 import Html exposing (Html)
-import Date
 import Signal exposing (..)
+import Debug
 import View exposing (view)
 import Types exposing (..)
-import Debug
+import Messanger exposing (output)
 
 
 initial : Model
@@ -13,18 +13,18 @@ initial =
     []
 
 
-messanger : Mailbox (Maybe Action)
-messanger =
-    mailbox Nothing
+update : Maybe Feeding -> Model -> Model
+update mf model =
+    case mf of
+        Just feeding ->
+            feeding :: model
 
-
-update : Maybe Action -> Model -> Model
-update maction feedings =
-    [ ( Date.fromTime 1451604066913, LeftBreast ), ( Date.fromTime 1451604066913, RightBreast ) ]
+        _ ->
+            model
 
 
 main : Signal Html
 main =
-    Signal.foldp update initial (.signal messanger)
+    Signal.foldp update initial output
         |> Debug.watch "Model"
         |> Signal.map view

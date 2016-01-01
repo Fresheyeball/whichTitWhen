@@ -2,8 +2,10 @@ module View (..) where
 
 import Html exposing (..)
 import Html.Attributes as Attr
-import Types exposing (..)
+import Html.Events as Evt
 import Date.Format exposing (format)
+import Types exposing (..)
+import Messanger
 
 
 renderFeeding : Feeding -> Html
@@ -79,17 +81,19 @@ css =
 toolBar : Html
 toolBar =
     let
-        tool text' =
+        tool text' action =
             div
-                [ Attr.class "item" ]
+                [ Attr.class "item"
+                , Evt.onClick Messanger.input action
+                ]
                 [ text text' ]
     in
         div
             [ Attr.class "ui four item fixed menu" ]
-            [ tool "Left Breast"
-            , tool "Right Breast"
-            , tool "Bottle"
-            , tool "Finished"
+            [ tool "Left Breast" LeftBreast
+            , tool "Right Breast" RightBreast
+            , tool "Bottle" Bottle
+            , tool "Done" Done
             ]
 
 
