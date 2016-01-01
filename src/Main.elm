@@ -5,6 +5,7 @@ import Date
 import Signal exposing (..)
 import View exposing (view)
 import Types exposing (..)
+import Debug
 
 
 initial : Model
@@ -25,4 +26,5 @@ update maction feedings =
 main : Signal Html
 main =
     Signal.foldp update initial (.signal messanger)
+        |> Debug.watch "Model"
         |> Signal.map view
