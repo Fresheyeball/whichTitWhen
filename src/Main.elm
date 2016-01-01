@@ -41,7 +41,7 @@ update mf feedings =
 munge : Time.Time -> List Feeding -> Html
 munge now feedings =
     view
-        (now - Maybe.withDefault 0 (lastDone feedings))
+        (now - Maybe.withDefault now (lastDone feedings))
         feedings
 
 

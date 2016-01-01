@@ -5,7 +5,7 @@ import Html.Attributes as Attr
 import Html.Events as Evt
 import Date.Format exposing (format)
 import Types exposing (..)
-import String exposing (join)
+import String
 import Time
 import Messanger
 
@@ -107,10 +107,18 @@ toolBar =
 timer : Time.Time -> Html
 timer time =
     let
-        showTime = toString << floor
+        showTime =
+            floor
+                >> clamp 0 100
+                >> toString
+                >> \i ->
+                    if String.length i < 2 then
+                        "0" ++ i
+                    else
+                        i
 
         formated =
-            join
+            String.join
                 ":"
                 [ showTime
                     (Time.inHours time)
@@ -119,9 +127,18 @@ timer time =
                 , showTime
                     (Time.inSeconds time)
                 ]
+
+        style =
+            [ ( "bottom", "0" )
+            , ( "left", "0" )
+            , ( "position", "fixed" )
+            , ( "padding", "15px" )
+            ]
     in
         div
-            [ Attr.class "ui item fixed bottom header" ]
+            [ Attr.class "ui item header"
+            , Attr.style style
+            ]
             [ text formated ]
 
 
