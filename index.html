@@ -11183,10 +11183,18 @@ Elm.View.make = function (_elm) {
       _U.list([$Html$Attributes.$class("ui celled striped table")]),
       _U.list([A2($Html.tbody,_U.list([]),A2($List.map,renderFeeding(address),feedings))]))]));
    });
-   var viewport = A3($Html.node,
-   "meta",
-   _U.list([$Html$Attributes.name("viewport"),$Html$Attributes.content("width=device-width, initial-scale=1")]),
-   _U.list([]));
+   var meta = F2(function (name,content) {
+      return A3($Html.node,"meta",_U.list([$Html$Attributes.name("viewport"),$Html$Attributes.content("width=device-width, initial-scale=1")]),_U.list([]));
+   });
+   var mobile = A2($Html.div,
+   _U.list([]),
+   _U.list([A2(meta,"viewport","width=device-width, initial-scale=1")
+           ,A2(meta,"apple-mobile-web-app-capable","yes")
+           ,A3($Html.node,
+           "link",
+           _U.list([$Html$Attributes.rel("apple-touch-icon")
+                   ,$Html$Attributes.href("https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Breastfeeding-icon-med.svg/2000px-Breastfeeding-icon-med.svg.png")]),
+           _U.list([]))]));
    var css = function () {
       var link$ = function ($package) {
          var url = A2($Basics._op["++"],"http://oss.maxcdn.com/",A2($Basics._op["++"],"semantic-ui/2.1.7/",A2($Basics._op["++"],$package,".min.css")));
@@ -11197,11 +11205,12 @@ Elm.View.make = function (_elm) {
    var view = F2(function (address,_p9) {
       var _p10 = _p9;
       var _p11 = _p10.feedings;
-      return A2($Html.div,_U.list([]),_U.list([viewport,css,toolBar(address),A2(renderFeedings,address,_p11),timer(A2(since,_p11,_p10.time))]));
+      return A2($Html.div,_U.list([]),_U.list([mobile,css,toolBar(address),A2(renderFeedings,address,_p11),timer(A2(since,_p11,_p10.time))]));
    });
    return _elm.View.values = {_op: _op
                              ,css: css
-                             ,viewport: viewport
+                             ,meta: meta
+                             ,mobile: mobile
                              ,renderFeeding: renderFeeding
                              ,renderFeedings: renderFeedings
                              ,toolBar: toolBar
