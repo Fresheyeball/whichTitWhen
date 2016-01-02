@@ -39,14 +39,23 @@ css =
             ]
 
 
-viewport : Html
-viewport =
+meta : String -> String -> Html
+meta name content =
     node
         "meta"
         [ Attr.name "viewport"
         , Attr.content "width=device-width, initial-scale=1"
         ]
         []
+
+
+mobile : Html
+mobile =
+    div
+        []
+        [ meta "viewport" "width=device-width, initial-scale=1"
+        , meta "apple-mobile-web-app-capable" "yes"
+        ]
 
 
 renderFeeding : Address Action -> Feeding -> Html
@@ -189,7 +198,7 @@ view : Address Action -> Model -> Html
 view address { feedings, time } =
     div
         []
-        [ viewport
+        [ mobile
         , css
         , toolBar address
         , renderFeedings address feedings
