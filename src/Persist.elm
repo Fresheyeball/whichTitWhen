@@ -68,13 +68,13 @@ restore =
                     decodeLactation
 
         decodeModel =
-            Json.Decode.decodeString
-                <| Json.Decode.list decodeFeeding
+            Json.Decode.list decodeFeeding
+                |> Json.Decode.decodeString
     in
         Task.toResult (LocalStorage.get key)
             |> Task.map
                 (\result ->
-                    case Debug.log "result" result `Result.andThen` decodeModel of
+                    case result `Result.andThen` decodeModel of
                         Ok feedings ->
                             Restore feedings
 

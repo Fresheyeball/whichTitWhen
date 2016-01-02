@@ -21,7 +21,7 @@ update action { feedings, time } =
                     ( time', lactation ) :: feedings
 
                 Restore feedingsFromStorage ->
-                    Debug.log "restored" feedingsFromStorage
+                    feedingsFromStorage
 
                 _ ->
                     feedings
