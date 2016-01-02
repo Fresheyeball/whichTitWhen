@@ -5397,160 +5397,6 @@ Elm.Signal.make = function (_elm) {
                                ,message: message
                                ,forwardTo: forwardTo
                                ,Mailbox: Mailbox};
-};Elm.Signal = Elm.Signal || {};
-Elm.Signal.Extra = Elm.Signal.Extra || {};
-Elm.Signal.Extra.make = function (_elm) {
-   "use strict";
-   _elm.Signal = _elm.Signal || {};
-   _elm.Signal.Extra = _elm.Signal.Extra || {};
-   if (_elm.Signal.Extra.values) return _elm.Signal.Extra.values;
-   var _U = Elm.Native.Utils.make(_elm),
-   $Basics = Elm.Basics.make(_elm),
-   $Debug = Elm.Debug.make(_elm),
-   $List = Elm.List.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
-   var _op = {};
-   var unsafeFromJust = function (maybe) {
-      var _p0 = maybe;
-      if (_p0.ctor === "Just") {
-            return _p0._0;
-         } else {
-            return _U.crashCase("Signal.Extra",{start: {line: 510,column: 3},end: {line: 515,column: 59}},_p0)("This case should have been unreachable");
-         }
-   };
-   var passiveMap2 = F2(function (func,a) {    return function (_p2) {    return A3($Signal.map2,func,a,A2($Signal.sampleOn,a,_p2));};});
-   var withPassive = passiveMap2(F2(function (x,y) {    return x(y);}));
-   var combine = A2($List.foldr,$Signal.map2(F2(function (x,y) {    return A2($List._op["::"],x,y);})),$Signal.constant(_U.list([])));
-   var mergeMany = F2(function (original,others) {    return A3($List.foldl,$Signal.merge,original,others);});
-   var filter = function (initial) {    return A2($Signal.filterMap,$Basics.identity,initial);};
-   var keepIf = $Signal.filter;
-   var runBuffer$ = F3(function (l,n,input) {
-      var f = F2(function (inp,prev) {
-         var l = $List.length(prev);
-         return _U.cmp(l,n) < 0 ? A2($Basics._op["++"],prev,_U.list([inp])) : A2($Basics._op["++"],A2($List.drop,l - n + 1,prev),_U.list([inp]));
-      });
-      return A3($Signal.foldp,f,l,input);
-   });
-   var runBuffer = runBuffer$(_U.list([]));
-   var initSignal = function (s) {    return A2($Signal.sampleOn,$Signal.constant({ctor: "_Tuple0"}),s);};
-   var zip4 = $Signal.map4(F4(function (v0,v1,v2,v3) {    return {ctor: "_Tuple4",_0: v0,_1: v1,_2: v2,_3: v3};}));
-   var zip3 = $Signal.map3(F3(function (v0,v1,v2) {    return {ctor: "_Tuple3",_0: v0,_1: v1,_2: v2};}));
-   var zip = $Signal.map2(F2(function (v0,v1) {    return {ctor: "_Tuple2",_0: v0,_1: v1};}));
-   var keepWhen = F3(function (boolSig,a,aSig) {
-      return A2($Signal.map,$Basics.snd,A3(keepIf,$Basics.fst,{ctor: "_Tuple2",_0: true,_1: a},A2($Signal.sampleOn,aSig,A2(zip,boolSig,aSig))));
-   });
-   var sampleWhen = F3(function (bs,def,sig) {
-      return A2($Signal.map,$Basics.snd,A3(keepIf,$Basics.fst,{ctor: "_Tuple2",_0: true,_1: def},A2(zip,bs,sig)));
-   });
-   var andMap = $Signal.map2(F2(function (x,y) {    return x(y);}));
-   _op["~"] = andMap;
-   var applyMany = F2(function (fs,l) {    return A2(_op["~"],fs,combine(l));});
-   _op["~>"] = $Basics.flip($Signal.map);
-   var foldpWith = F4(function (unpack,step,init,input) {
-      var step$ = F2(function (a,_p3) {    var _p4 = _p3;return unpack(A2(step,a,_p4._1));});
-      return A2(_op["~>"],A3($Signal.foldp,step$,init,input),$Basics.fst);
-   });
-   _op["<~"] = $Signal.map;
-   var unzip = function (pairS) {    return {ctor: "_Tuple2",_0: A2(_op["<~"],$Basics.fst,pairS),_1: A2(_op["<~"],$Basics.snd,pairS)};};
-   var unzip3 = function (pairS) {
-      return {ctor: "_Tuple3"
-             ,_0: A2(_op["<~"],function (_p5) {    var _p6 = _p5;return _p6._0;},pairS)
-             ,_1: A2(_op["<~"],function (_p7) {    var _p8 = _p7;return _p8._1;},pairS)
-             ,_2: A2(_op["<~"],function (_p9) {    var _p10 = _p9;return _p10._2;},pairS)};
-   };
-   var unzip4 = function (pairS) {
-      return {ctor: "_Tuple4"
-             ,_0: A2(_op["<~"],function (_p11) {    var _p12 = _p11;return _p12._0;},pairS)
-             ,_1: A2(_op["<~"],function (_p13) {    var _p14 = _p13;return _p14._1;},pairS)
-             ,_2: A2(_op["<~"],function (_p15) {    var _p16 = _p15;return _p16._2;},pairS)
-             ,_3: A2(_op["<~"],function (_p17) {    var _p18 = _p17;return _p18._3;},pairS)};
-   };
-   var foldp$ = F3(function (fun,initFun,input) {
-      var fun$ = F2(function (_p19,mb) {    var _p20 = _p19;return $Maybe.Just(A2(fun,_p20._0,A2($Maybe.withDefault,_p20._1,mb)));});
-      var initial = A2(_op["~>"],initSignal(input),initFun);
-      var rest = A3($Signal.foldp,fun$,$Maybe.Nothing,A2(zip,input,initial));
-      return A2(_op["<~"],unsafeFromJust,A2($Signal.merge,A2(_op["<~"],$Maybe.Just,initial),rest));
-   });
-   var deltas = function (signal) {
-      var initial = function (value) {    return {ctor: "_Tuple2",_0: value,_1: value};};
-      var step = F2(function (value,delta) {    return {ctor: "_Tuple2",_0: $Basics.snd(delta),_1: value};});
-      return A3(foldp$,step,initial,signal);
-   };
-   var foldps = F3(function (f,bs,aS) {
-      return A2(_op["<~"],$Basics.fst,A3($Signal.foldp,F2(function (a,_p21) {    var _p22 = _p21;return A2(f,a,_p22._1);}),bs,aS));
-   });
-   var delayRound = F2(function (b,bS) {
-      return A3(foldps,F2(function ($new,old) {    return {ctor: "_Tuple2",_0: old,_1: $new};}),{ctor: "_Tuple2",_0: b,_1: b},bS);
-   });
-   var filterFold = F2(function (f,initial) {
-      var f$ = F2(function (a,s) {    var res = A2(f,a,s);return {ctor: "_Tuple2",_0: res,_1: A2($Maybe.withDefault,s,res)};});
-      return function (_p23) {
-         return A2(filter,initial,A3(foldps,f$,{ctor: "_Tuple2",_0: $Maybe.Just(initial),_1: initial},_p23));
-      };
-   });
-   var foldps$ = F3(function (f,iF,aS) {
-      return A2(_op["<~"],$Basics.fst,A3(foldp$,F2(function (a,_p24) {    var _p25 = _p24;return A2(f,a,_p25._1);}),iF,aS));
-   });
-   var switchHelper = F4(function (filter,b,l,r) {
-      var lAndR = A2($Signal.merge,
-      A3(filter,b,$Maybe.Nothing,A2(_op["<~"],$Maybe.Just,l)),
-      A3(filter,A2(_op["<~"],$Basics.not,b),$Maybe.Nothing,A2(_op["<~"],$Maybe.Just,r)));
-      var base = A2(_op["~"],
-      A2(_op["~"],A2(_op["<~"],F3(function (bi,li,ri) {    return $Maybe.Just(bi ? li : ri);}),initSignal(b)),initSignal(l)),
-      initSignal(r));
-      return A2(_op["<~"],unsafeFromJust,A2($Signal.merge,base,lAndR));
-   });
-   var switchWhen = F3(function (b,l,r) {    return A4(switchHelper,keepWhen,b,l,r);});
-   var switchSample = F3(function (b,l,r) {    return A4(switchHelper,sampleWhen,b,l,r);});
-   var keepThen = F3(function (choice,base,signal) {    return A3(switchSample,choice,signal,$Signal.constant(base));});
-   var keepWhenI = F2(function (fs,s) {
-      return A2(_op["~>"],A3(keepWhen,A2($Signal.merge,$Signal.constant(true),fs),$Maybe.Nothing,A2(_op["<~"],$Maybe.Just,s)),unsafeFromJust);
-   });
-   var fairMerge = F3(function (resolve,left,right) {
-      var merged = A2($Signal.merge,left,right);
-      var boolRight = A2(_op["<~"],$Basics.always(false),right);
-      var boolLeft = A2(_op["<~"],$Basics.always(true),left);
-      var bothUpdated = A2(_op["~"],
-      A2(_op["<~"],F2(function (x,y) {    return !_U.eq(x,y);}),A2($Signal.merge,boolLeft,boolRight)),
-      A2($Signal.merge,boolRight,boolLeft));
-      var keep = keepWhenI(bothUpdated);
-      var resolved = A2(_op["~"],A2(_op["<~"],resolve,keep(left)),keep(right));
-      return A2($Signal.merge,resolved,merged);
-   });
-   var mapMany = F2(function (f,l) {    return A2(_op["<~"],f,combine(l));});
-   return _elm.Signal.Extra.values = {_op: _op
-                                     ,andMap: andMap
-                                     ,zip: zip
-                                     ,zip3: zip3
-                                     ,zip4: zip4
-                                     ,unzip: unzip
-                                     ,unzip3: unzip3
-                                     ,unzip4: unzip4
-                                     ,foldp$: foldp$
-                                     ,foldps: foldps
-                                     ,foldps$: foldps$
-                                     ,runBuffer: runBuffer
-                                     ,runBuffer$: runBuffer$
-                                     ,deltas: deltas
-                                     ,delayRound: delayRound
-                                     ,keepIf: keepIf
-                                     ,keepWhen: keepWhen
-                                     ,sampleWhen: sampleWhen
-                                     ,switchWhen: switchWhen
-                                     ,keepWhenI: keepWhenI
-                                     ,switchSample: switchSample
-                                     ,keepThen: keepThen
-                                     ,filter: filter
-                                     ,filterFold: filterFold
-                                     ,fairMerge: fairMerge
-                                     ,mergeMany: mergeMany
-                                     ,combine: combine
-                                     ,mapMany: mapMany
-                                     ,applyMany: applyMany
-                                     ,passiveMap2: passiveMap2
-                                     ,withPassive: withPassive};
 };Elm.Native.Time = {};
 
 Elm.Native.Time.make = function(localRuntime)
@@ -8668,6 +8514,201 @@ Elm.Regex.make = function (_elm) {
                               ,Match: Match
                               ,All: All
                               ,AtMost: AtMost};
+};Elm.Native.Effects = {};
+Elm.Native.Effects.make = function(localRuntime) {
+
+	localRuntime.Native = localRuntime.Native || {};
+	localRuntime.Native.Effects = localRuntime.Native.Effects || {};
+	if (localRuntime.Native.Effects.values)
+	{
+		return localRuntime.Native.Effects.values;
+	}
+
+	var Task = Elm.Native.Task.make(localRuntime);
+	var Utils = Elm.Native.Utils.make(localRuntime);
+	var Signal = Elm.Signal.make(localRuntime);
+	var List = Elm.Native.List.make(localRuntime);
+
+
+	// polyfill so things will work even if rAF is not available for some reason
+	var _requestAnimationFrame =
+		typeof requestAnimationFrame !== 'undefined'
+			? requestAnimationFrame
+			: function(cb) { setTimeout(cb, 1000 / 60); }
+			;
+
+
+	// batchedSending and sendCallback implement a small state machine in order
+	// to schedule only one send(time) call per animation frame.
+	//
+	// Invariants:
+	// 1. In the NO_REQUEST state, there is never a scheduled sendCallback.
+	// 2. In the PENDING_REQUEST and EXTRA_REQUEST states, there is always exactly
+	//    one scheduled sendCallback.
+	var NO_REQUEST = 0;
+	var PENDING_REQUEST = 1;
+	var EXTRA_REQUEST = 2;
+	var state = NO_REQUEST;
+	var messageArray = [];
+
+
+	function batchedSending(address, tickMessages)
+	{
+		// insert ticks into the messageArray
+		var foundAddress = false;
+
+		for (var i = messageArray.length; i--; )
+		{
+			if (messageArray[i].address === address)
+			{
+				foundAddress = true;
+				messageArray[i].tickMessages = A3(List.foldl, List.cons, messageArray[i].tickMessages, tickMessages);
+				break;
+			}
+		}
+
+		if (!foundAddress)
+		{
+			messageArray.push({ address: address, tickMessages: tickMessages });
+		}
+
+		// do the appropriate state transition
+		switch (state)
+		{
+			case NO_REQUEST:
+				_requestAnimationFrame(sendCallback);
+				state = PENDING_REQUEST;
+				break;
+			case PENDING_REQUEST:
+				state = PENDING_REQUEST;
+				break;
+			case EXTRA_REQUEST:
+				state = PENDING_REQUEST;
+				break;
+		}
+	}
+
+
+	function sendCallback(time)
+	{
+		switch (state)
+		{
+			case NO_REQUEST:
+				// This state should not be possible. How can there be no
+				// request, yet somehow we are actively fulfilling a
+				// request?
+				throw new Error(
+					'Unexpected send callback.\n' +
+					'Please report this to <https://github.com/evancz/elm-effects/issues>.'
+				);
+
+			case PENDING_REQUEST:
+				// At this point, we do not *know* that another frame is
+				// needed, but we make an extra request to rAF just in
+				// case. It's possible to drop a frame if rAF is called
+				// too late, so we just do it preemptively.
+				_requestAnimationFrame(sendCallback);
+				state = EXTRA_REQUEST;
+
+				// There's also stuff we definitely need to send.
+				send(time);
+				return;
+
+			case EXTRA_REQUEST:
+				// Turns out the extra request was not needed, so we will
+				// stop calling rAF. No reason to call it all the time if
+				// no one needs it.
+				state = NO_REQUEST;
+				return;
+		}
+	}
+
+
+	function send(time)
+	{
+		for (var i = messageArray.length; i--; )
+		{
+			var messages = A3(
+				List.foldl,
+				F2( function(toAction, list) { return List.Cons(toAction(time), list); } ),
+				List.Nil,
+				messageArray[i].tickMessages
+			);
+			Task.perform( A2(Signal.send, messageArray[i].address, messages) );
+		}
+		messageArray = [];
+	}
+
+
+	function requestTickSending(address, tickMessages)
+	{
+		return Task.asyncFunction(function(callback) {
+			batchedSending(address, tickMessages);
+			callback(Task.succeed(Utils.Tuple0));
+		});
+	}
+
+
+	return localRuntime.Native.Effects.values = {
+		requestTickSending: F2(requestTickSending)
+	};
+
+};
+Elm.Effects = Elm.Effects || {};
+Elm.Effects.make = function (_elm) {
+   "use strict";
+   _elm.Effects = _elm.Effects || {};
+   if (_elm.Effects.values) return _elm.Effects.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Native$Effects = Elm.Native.Effects.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $Task = Elm.Task.make(_elm),
+   $Time = Elm.Time.make(_elm);
+   var _op = {};
+   var ignore = function (task) {    return A2($Task.map,$Basics.always({ctor: "_Tuple0"}),task);};
+   var requestTickSending = $Native$Effects.requestTickSending;
+   var toTaskHelp = F3(function (address,effect,_p0) {
+      var _p1 = _p0;
+      var _p5 = _p1._1;
+      var _p4 = _p1;
+      var _p3 = _p1._0;
+      var _p2 = effect;
+      switch (_p2.ctor)
+      {case "Task": var reporter = A2($Task.andThen,_p2._0,function (answer) {    return A2($Signal.send,address,_U.list([answer]));});
+           return {ctor: "_Tuple2",_0: A2($Task.andThen,_p3,$Basics.always(ignore($Task.spawn(reporter)))),_1: _p5};
+         case "Tick": return {ctor: "_Tuple2",_0: _p3,_1: A2($List._op["::"],_p2._0,_p5)};
+         case "None": return _p4;
+         default: return A3($List.foldl,toTaskHelp(address),_p4,_p2._0);}
+   });
+   var toTask = F2(function (address,effect) {
+      var _p6 = A3(toTaskHelp,address,effect,{ctor: "_Tuple2",_0: $Task.succeed({ctor: "_Tuple0"}),_1: _U.list([])});
+      var combinedTask = _p6._0;
+      var tickMessages = _p6._1;
+      return $List.isEmpty(tickMessages) ? combinedTask : A2($Task.andThen,combinedTask,$Basics.always(A2(requestTickSending,address,tickMessages)));
+   });
+   var Never = function (a) {    return {ctor: "Never",_0: a};};
+   var Batch = function (a) {    return {ctor: "Batch",_0: a};};
+   var batch = Batch;
+   var None = {ctor: "None"};
+   var none = None;
+   var Tick = function (a) {    return {ctor: "Tick",_0: a};};
+   var tick = Tick;
+   var Task = function (a) {    return {ctor: "Task",_0: a};};
+   var task = Task;
+   var map = F2(function (func,effect) {
+      var _p7 = effect;
+      switch (_p7.ctor)
+      {case "Task": return Task(A2($Task.map,func,_p7._0));
+         case "Tick": return Tick(function (_p8) {    return func(_p7._0(_p8));});
+         case "None": return None;
+         default: return Batch(A2($List.map,map(func),_p7._0));}
+   });
+   return _elm.Effects.values = {_op: _op,none: none,task: task,tick: tick,map: map,batch: batch,toTask: toTask};
 };(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 
 },{}],2:[function(require,module,exports){
@@ -10820,6 +10861,44 @@ Elm.Html.Events.make = function (_elm) {
                                     ,targetChecked: targetChecked
                                     ,keyCode: keyCode
                                     ,Options: Options};
+};Elm.StartApp = Elm.StartApp || {};
+Elm.StartApp.make = function (_elm) {
+   "use strict";
+   _elm.StartApp = _elm.StartApp || {};
+   if (_elm.StartApp.values) return _elm.StartApp.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $Effects = Elm.Effects.make(_elm),
+   $Html = Elm.Html.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $Task = Elm.Task.make(_elm);
+   var _op = {};
+   var start = function (config) {
+      var updateStep = F2(function (action,_p0) {
+         var _p1 = _p0;
+         var _p2 = A2(config.update,action,_p1._0);
+         var newModel = _p2._0;
+         var additionalEffects = _p2._1;
+         return {ctor: "_Tuple2",_0: newModel,_1: $Effects.batch(_U.list([_p1._1,additionalEffects]))};
+      });
+      var update = F2(function (actions,_p3) {    var _p4 = _p3;return A3($List.foldl,updateStep,{ctor: "_Tuple2",_0: _p4._0,_1: $Effects.none},actions);});
+      var messages = $Signal.mailbox(_U.list([]));
+      var singleton = function (action) {    return _U.list([action]);};
+      var address = A2($Signal.forwardTo,messages.address,singleton);
+      var inputs = $Signal.mergeMany(A2($List._op["::"],messages.signal,A2($List.map,$Signal.map(singleton),config.inputs)));
+      var effectsAndModel = A3($Signal.foldp,update,config.init,inputs);
+      var model = A2($Signal.map,$Basics.fst,effectsAndModel);
+      return {html: A2($Signal.map,config.view(address),model)
+             ,model: model
+             ,tasks: A2($Signal.map,function (_p5) {    return A2($Effects.toTask,messages.address,$Basics.snd(_p5));},effectsAndModel)};
+   };
+   var App = F3(function (a,b,c) {    return {html: a,model: b,tasks: c};});
+   var Config = F4(function (a,b,c,d) {    return {init: a,update: b,view: c,inputs: d};});
+   return _elm.StartApp.values = {_op: _op,start: start,Config: Config,App: App};
 };Elm.Date = Elm.Date || {};
 Elm.Date.Format = Elm.Date.Format || {};
 Elm.Date.Format.make = function (_elm) {
@@ -10914,28 +10993,6 @@ Elm.Date.Format.make = function (_elm) {
    var re = $Regex.regex("(^|[^%])%(Y|m|B|b|d|e|a|A|H|k|I|l|p|P|M|S)");
    var format = F2(function (s,d) {    return A4($Regex.replace,$Regex.All,re,formatToken(d),s);});
    return _elm.Date.Format.values = {_op: _op,format: format};
-};Elm.Types = Elm.Types || {};
-Elm.Types.make = function (_elm) {
-   "use strict";
-   _elm.Types = _elm.Types || {};
-   if (_elm.Types.values) return _elm.Types.values;
-   var _U = Elm.Native.Utils.make(_elm),
-   $Basics = Elm.Basics.make(_elm),
-   $Debug = Elm.Debug.make(_elm),
-   $List = Elm.List.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm),
-   $Time = Elm.Time.make(_elm);
-   var _op = {};
-   var Clobber = function (a) {    return {ctor: "Clobber",_0: a};};
-   var Delete = function (a) {    return {ctor: "Delete",_0: a};};
-   var Add = function (a) {    return {ctor: "Add",_0: a};};
-   var Done = {ctor: "Done"};
-   var Bottle = {ctor: "Bottle"};
-   var RightBreast = {ctor: "RightBreast"};
-   var LeftBreast = {ctor: "LeftBreast"};
-   return _elm.Types.values = {_op: _op,LeftBreast: LeftBreast,RightBreast: RightBreast,Bottle: Bottle,Done: Done,Add: Add,Delete: Delete,Clobber: Clobber};
 };window.foreign = {
     'sanitize': function (record) {
         var spaces = Array.prototype.slice.call(arguments, 1);
@@ -10954,75 +11011,52 @@ var make = function make(localRuntime) {
         var Signalø1 = Elm.Native.Signal.make(localRuntime);
         var Tuple0ø1 = (Utilsø1 || 0)['Tuple0'];
         return (function () {
-            foreign.sanitize(localRuntime, 'Native', 'StorageBox');
-            return localRuntime.Native.StorageBox.values ? localRuntime.Native.StorageBox.values : localRuntime.Native.StorageBox.values = {
-                'storageBox': F2(function (key, defaultValue) {
-                    return function () {
-                        var getItemø1 = function () {
-                            return function () {
-                                var xø1 = localStorage.getItem(key);
-                                return xø1 == null ? defaultValue : JSON.parse(xø1);
-                            }.call(this);
-                        };
-                        var streamø1 = Signalø1.input('retrieve.' + key, getItemø1());
-                        var initialø1 = getItemø1();
-                        var sendø1 = function (value) {
-                            return Taskø1.asyncFunction(function (callback) {
-                                return (function () {
-                                    localRuntime.setTimeout(function () {
-                                        return !(value == defaultValue) ? (function () {
-                                            localStorage.setItem(key, JSON.stringify(value));
-                                            return localRuntime.notify(streamø1.id, getItemø1());
-                                        })() : void 0;
-                                    }, 0);
-                                    return callback(Taskø1.succeed(Tuple0ø1));
-                                })();
-                            });
-                        };
+            foreign.sanitize(localRuntime, 'Native', 'LocalStorage');
+            return localRuntime.Native.LocalStorage.values ? localRuntime.Native.LocalStorage.values : localRuntime.Native.LocalStorage.values = {
+                'get': function (key) {
+                    return Taskø1.asyncFunction(function (callback) {
+                        return function () {
+                            var xø1 = localStorage.getItem(key);
+                            return callback(xø1 == null ? Taskø1.fail('Key not found') : Taskø1.succeed(xø1));
+                        }.call(this);
+                    });
+                },
+                'set': F2(function (key, value) {
+                    return Taskø1.asyncFunction(function (callback) {
                         return (function () {
-                            localRuntime.addListener([streamø1.id], window, 'storage', function () {
-                                return localRuntime.notify(streamø1.id, getItemø1());
-                            });
-                            return {
-                                'address': {
-                                    'ctor': 'Address',
-                                    '_0': sendø1
-                                },
-                                'signal': streamø1
-                            };
+                            localStorage.setItem(key, value);
+                            return callback(Taskø1.succeed(Tuple0ø1));
                         })();
-                    }.call(this);
+                    });
                 })
             };
         })();
     }.call(this);
 };
-foreign.sanitize(Elm, 'Native', 'StorageBox');
-Elm.Native.StorageBox.make = make;Elm.StorageBox = Elm.StorageBox || {};
-Elm.StorageBox.make = function (_elm) {
+foreign.sanitize(Elm, 'Native', 'LocalStorage');
+Elm.Native.LocalStorage.make = make;Elm.LocalStorage = Elm.LocalStorage || {};
+Elm.LocalStorage.make = function (_elm) {
    "use strict";
-   _elm.StorageBox = _elm.StorageBox || {};
-   if (_elm.StorageBox.values) return _elm.StorageBox.values;
+   _elm.LocalStorage = _elm.LocalStorage || {};
+   if (_elm.LocalStorage.values) return _elm.LocalStorage.values;
    var _U = Elm.Native.Utils.make(_elm),
    $Basics = Elm.Basics.make(_elm),
    $Debug = Elm.Debug.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
-   $Native$StorageBox = Elm.Native.StorageBox.make(_elm),
+   $Native$LocalStorage = Elm.Native.LocalStorage.make(_elm),
    $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
+   $Signal = Elm.Signal.make(_elm),
+   $Task = Elm.Task.make(_elm);
    var _op = {};
-   var storageBox = F2(function (key,a) {
-      var box = A2($Native$StorageBox.storageBox,key,a);
-      return _U.update(box,{signal: $Signal.dropRepeats(function (_) {    return _.signal;}(box))});
-   });
-   var StorageBox = F2(function (a,b) {    return {address: a,signal: b};});
-   return _elm.StorageBox.values = {_op: _op,storageBox: storageBox,StorageBox: StorageBox};
-};Elm.Persist = Elm.Persist || {};
-Elm.Persist.make = function (_elm) {
+   var set = $Native$LocalStorage.set;
+   var get = $Native$LocalStorage.get;
+   return _elm.LocalStorage.values = {_op: _op,get: get,set: set};
+};Elm.Types = Elm.Types || {};
+Elm.Types.make = function (_elm) {
    "use strict";
-   _elm.Persist = _elm.Persist || {};
-   if (_elm.Persist.values) return _elm.Persist.values;
+   _elm.Types = _elm.Types || {};
+   if (_elm.Types.values) return _elm.Types.values;
    var _U = Elm.Native.Utils.make(_elm),
    $Basics = Elm.Basics.make(_elm),
    $Debug = Elm.Debug.make(_elm),
@@ -11030,48 +11064,29 @@ Elm.Persist.make = function (_elm) {
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm),
-   $StorageBox = Elm.StorageBox.make(_elm),
-   $Types = Elm.Types.make(_elm);
+   $Time = Elm.Time.make(_elm);
    var _op = {};
-   var storage = A2($StorageBox.storageBox,"whichTitWhen",_U.list([]));
-   return _elm.Persist.values = {_op: _op,storage: storage};
-};Elm.Messenger = Elm.Messenger || {};
-Elm.Messenger.make = function (_elm) {
-   "use strict";
-   _elm.Messenger = _elm.Messenger || {};
-   if (_elm.Messenger.values) return _elm.Messenger.values;
-   var _U = Elm.Native.Utils.make(_elm),
-   $Basics = Elm.Basics.make(_elm),
-   $Debug = Elm.Debug.make(_elm),
-   $List = Elm.List.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Persist = Elm.Persist.make(_elm),
-   $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm),
-   $Signal$Extra = Elm.Signal.Extra.make(_elm),
-   $Time = Elm.Time.make(_elm),
-   $Types = Elm.Types.make(_elm);
-   var _op = {};
-   var messenger = $Signal.mailbox($Maybe.Nothing);
-   var input = A2($Signal.forwardTo,function (_) {    return _.address;}(messenger),$Maybe.Just);
-   var output = function () {
-      var clobber = A2($Signal.map,
-      function (_p0) {
-         return A2($Debug.log,"Clobber",$Maybe.Just($Types.Clobber(_p0)));
-      },
-      function (_) {
-         return _.signal;
-      }($Persist.storage));
-      var add = function () {
-         var transform = function (_p1) {
-            var _p2 = _p1;
-            return A2($Maybe.map,function (feeding) {    return $Types.Add({ctor: "_Tuple2",_0: _p2._0,_1: feeding});},_p2._1);
-         };
-         return A2($Signal.map,transform,$Time.timestamp(function (_) {    return _.signal;}(messenger)));
-      }();
-      return A2($Signal.map,$Debug.log("Actions"),A3($Signal$Extra.fairMerge,F2(function (l,r) {    return l;}),clobber,add));
-   }();
-   return _elm.Messenger.values = {_op: _op,input: input,output: output};
+   var Model = F2(function (a,b) {    return {feedings: a,time: b};});
+   var NoOp = {ctor: "NoOp"};
+   var Delete = function (a) {    return {ctor: "Delete",_0: a};};
+   var Restore = function (a) {    return {ctor: "Restore",_0: a};};
+   var Tick = function (a) {    return {ctor: "Tick",_0: a};};
+   var Add = function (a) {    return {ctor: "Add",_0: a};};
+   var Done = {ctor: "Done"};
+   var Bottle = {ctor: "Bottle"};
+   var RightBreast = {ctor: "RightBreast"};
+   var LeftBreast = {ctor: "LeftBreast"};
+   return _elm.Types.values = {_op: _op
+                              ,LeftBreast: LeftBreast
+                              ,RightBreast: RightBreast
+                              ,Bottle: Bottle
+                              ,Done: Done
+                              ,Add: Add
+                              ,Tick: Tick
+                              ,Restore: Restore
+                              ,Delete: Delete
+                              ,NoOp: NoOp
+                              ,Model: Model};
 };Elm.View = Elm.View || {};
 Elm.View.make = function (_elm) {
    "use strict";
@@ -11087,13 +11102,27 @@ Elm.View.make = function (_elm) {
    $Html$Events = Elm.Html.Events.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
-   $Messenger = Elm.Messenger.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm),
    $String = Elm.String.make(_elm),
    $Time = Elm.Time.make(_elm),
    $Types = Elm.Types.make(_elm);
    var _op = {};
+   var since = F2(function (feedings,now) {
+      var lastDone = function () {
+         var f = F2(function (_p0,mdone) {
+            var _p1 = _p0;
+            var _p2 = mdone;
+            if (_p2.ctor === "Nothing") {
+                  return _U.eq(_p1._1,$Types.Done) ? $Maybe.Just(_p1._0) : $Maybe.Nothing;
+               } else {
+                  return mdone;
+               }
+         });
+         return A2($List.foldl,f,$Maybe.Nothing);
+      }();
+      return now - A2($Maybe.withDefault,now,lastDone(feedings));
+   });
    var timer = function (time) {
       var style = _U.list([{ctor: "_Tuple2",_0: "bottom",_1: "0"}
                           ,{ctor: "_Tuple2",_0: "left",_1: "0"}
@@ -11107,9 +11136,9 @@ Elm.View.make = function (_elm) {
       var formated = A2($String.join,":",_U.list([A2(showTime,$Time.inHours,24),A2(showTime,$Time.inMinutes,60),A2(showTime,$Time.inSeconds,60)]));
       return A2($Html.div,_U.list([$Html$Attributes.$class("ui item header"),$Html$Attributes.style(style)]),_U.list([$Html.text(formated)]));
    };
-   var toolBar = function () {
-      var tool = F2(function (text$,action) {
-         return A2($Html.div,_U.list([$Html$Attributes.$class("item"),A2($Html$Events.onClick,$Messenger.input,action)]),_U.list([$Html.text(text$)]));
+   var toolBar = function (address) {
+      var tool = F2(function (text$,lactation) {
+         return A2($Html.div,_U.list([$Html$Attributes.$class("item"),A2($Html$Events.onClick,address,$Types.Add(lactation))]),_U.list([$Html.text(text$)]));
       });
       return A2($Html.div,
       _U.list([$Html$Attributes.$class("ui four item fixed menu"),$Html$Attributes.style(_U.list([{ctor: "_Tuple2",_0: "cursor",_1: "pointer"}]))]),
@@ -11117,33 +11146,46 @@ Elm.View.make = function (_elm) {
               ,A2(tool,"Right Breast",$Types.RightBreast)
               ,A2(tool,"Bottle",$Types.Bottle)
               ,A2(tool,"Done",$Types.Done)]));
-   }();
-   var renderFeeding = function (_p0) {
-      var _p1 = _p0;
-      var _p2 = function () {
-         var _p3 = _p1._1;
-         switch (_p3.ctor)
+   };
+   var renderFeeding = F2(function (address,_p3) {
+      var _p4 = _p3;
+      var _p8 = _p4._0;
+      var _p7 = _p4._1;
+      var _p5 = function () {
+         var _p6 = _p7;
+         switch (_p6.ctor)
          {case "LeftBreast": return {ctor: "_Tuple2",_0: "Left",_1: "caret left"};
             case "RightBreast": return {ctor: "_Tuple2",_0: "Right",_1: "caret right"};
             case "Bottle": return {ctor: "_Tuple2",_0: "Bottle",_1: "caret up"};
             default: return {ctor: "_Tuple2",_0: "Finished",_1: "star"};}
       }();
-      var message = _p2._0;
-      var icon = _p2._1;
+      var message = _p5._0;
+      var icon = _p5._1;
       return A2($Html.tr,
       _U.list([]),
       _U.list([A2($Html.td,
               _U.list([$Html$Attributes.$class("collapsing")]),
               _U.list([A2($Html.i,_U.list([$Html$Attributes.$class(A2($Basics._op["++"],"icon ",icon))]),_U.list([])),$Html.text(message)]))
-              ,A2($Html.td,_U.list([]),_U.list([$Html.text(A2($Date$Format.format,"%d/%m/%Y %I:%M %P",$Date.fromTime(_p1._0)))]))]));
-   };
-   var renderFeedings = function (feedings) {
+              ,A2($Html.td,_U.list([]),_U.list([$Html.text(A2($Date$Format.format,"%d/%m/%Y %I:%M %P",$Date.fromTime(_p8)))]))
+              ,A2($Html.td,
+              _U.list([$Html$Attributes.$class("collapsing")]),
+              _U.list([A2($Html.i,
+              _U.list([$Html$Attributes.$class("icon x")
+                      ,$Html$Attributes.style(_U.list([{ctor: "_Tuple2",_0: "cursor",_1: "pointer"}]))
+                      ,A2($Html$Events.onClick,address,$Types.Delete({ctor: "_Tuple2",_0: _p8,_1: _p7}))]),
+              _U.list([]))]))]));
+   });
+   var renderFeedings = F2(function (address,feedings) {
       return A2($Html.div,
       _U.list([$Html$Attributes.$class("ui main text container"),$Html$Attributes.style(_U.list([{ctor: "_Tuple2",_0: "margin-top",_1: "50px"}]))]),
       _U.list([A2($Html.table,
       _U.list([$Html$Attributes.$class("ui celled striped table")]),
-      _U.list([A2($Html.tbody,_U.list([]),A2($List.map,renderFeeding,feedings))]))]));
-   };
+      _U.list([A2($Html.tbody,_U.list([]),A2($List.map,renderFeeding(address),feedings))]))]));
+   });
+   var viewport = A3($Html.node,
+   "meta",
+   _U.list([$Html$Attributes.name("viewport"),$Html$Attributes.content("width=device-width, initial-scale=1")]),
+   _U.list([]));
    var css = function () {
       var link$ = function ($package) {
          var url = A2($Basics._op["++"],"http://oss.maxcdn.com/",A2($Basics._op["++"],"semantic-ui/2.1.7/",A2($Basics._op["++"],$package,".min.css")));
@@ -11151,8 +11193,84 @@ Elm.View.make = function (_elm) {
       };
       return A2($Html.div,_U.list([]),_U.list([link$("semantic"),link$("components/table"),link$("components/icon"),link$("components/menu")]));
    }();
-   var view = F2(function (since,feedings) {    return A2($Html.div,_U.list([]),_U.list([css,toolBar,renderFeedings(feedings),timer(since)]));});
-   return _elm.View.values = {_op: _op,css: css,renderFeeding: renderFeeding,renderFeedings: renderFeedings,toolBar: toolBar,timer: timer,view: view};
+   var view = F2(function (address,_p9) {
+      var _p10 = _p9;
+      var _p11 = _p10.feedings;
+      return A2($Html.div,_U.list([]),_U.list([viewport,css,toolBar(address),A2(renderFeedings,address,_p11),timer(A2(since,_p11,_p10.time))]));
+   });
+   return _elm.View.values = {_op: _op
+                             ,css: css
+                             ,viewport: viewport
+                             ,renderFeeding: renderFeeding
+                             ,renderFeedings: renderFeedings
+                             ,toolBar: toolBar
+                             ,timer: timer
+                             ,since: since
+                             ,view: view};
+};Elm.Persist = Elm.Persist || {};
+Elm.Persist.make = function (_elm) {
+   "use strict";
+   _elm.Persist = _elm.Persist || {};
+   if (_elm.Persist.values) return _elm.Persist.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $Effects = Elm.Effects.make(_elm),
+   $Json$Decode = Elm.Json.Decode.make(_elm),
+   $Json$Encode = Elm.Json.Encode.make(_elm),
+   $List = Elm.List.make(_elm),
+   $LocalStorage = Elm.LocalStorage.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $Task = Elm.Task.make(_elm),
+   $Types = Elm.Types.make(_elm);
+   var _op = {};
+   var key = "whichTitWhen";
+   var save = function (feedings) {
+      _op["=>"] = F2(function (v0,v1) {    return {ctor: "_Tuple2",_0: v0,_1: v1};});
+      var feedings$ = function () {
+         var encodeFeeding = function (_p0) {
+            var _p1 = _p0;
+            return $Json$Encode.object(_U.list([A2(_op["=>"],"lactation",$Json$Encode.string($Basics.toString(_p1._1)))
+                                               ,A2(_op["=>"],"time",$Json$Encode.$float(_p1._0))]));
+         };
+         return A2($Json$Encode.encode,0,$Json$Encode.list(A2($List.map,encodeFeeding,feedings)));
+      }();
+      return $Effects.task(A2($Task.map,$Basics.always($Types.NoOp),A2($LocalStorage.set,key,feedings$)));
+   };
+   var restore = function () {
+      var decodeFeeding = function () {
+         var decodeLactation = function (_p2) {
+            var _p3 = _p2;
+            var _p5 = _p3._0;
+            var _p4 = _p3._1;
+            switch (_p4)
+            {case "LeftBreast": return $Result.Ok({ctor: "_Tuple2",_0: _p5,_1: $Types.LeftBreast});
+               case "RightBreast": return $Result.Ok({ctor: "_Tuple2",_0: _p5,_1: $Types.RightBreast});
+               case "Bottle": return $Result.Ok({ctor: "_Tuple2",_0: _p5,_1: $Types.Bottle});
+               case "Done": return $Result.Ok({ctor: "_Tuple2",_0: _p5,_1: $Types.Done});
+               default: return $Result.Err("Lactation Decode Failed");}
+         };
+         var decodeTup = A3($Json$Decode.object2,
+         F2(function (v0,v1) {    return {ctor: "_Tuple2",_0: v0,_1: v1};}),
+         A2($Json$Decode._op[":="],"time",$Json$Decode.$float),
+         A2($Json$Decode._op[":="],"lactation",$Json$Decode.string));
+         return A2($Json$Decode.customDecoder,decodeTup,decodeLactation);
+      }();
+      var decodeModel = $Json$Decode.decodeString($Json$Decode.list(decodeFeeding));
+      return $Effects.task(A2($Task.map,
+      function (result) {
+         var _p6 = A2($Result.andThen,result,decodeModel);
+         if (_p6.ctor === "Ok") {
+               return $Types.Restore(_p6._0);
+            } else {
+               return $Types.NoOp;
+            }
+      },
+      $Task.toResult($LocalStorage.get(key))));
+   }();
+   return _elm.Persist.values = {_op: _op,save: save,restore: restore};
 };Elm.Main = Elm.Main || {};
 Elm.Main.make = function (_elm) {
    "use strict";
@@ -11161,50 +11279,45 @@ Elm.Main.make = function (_elm) {
    var _U = Elm.Native.Utils.make(_elm),
    $Basics = Elm.Basics.make(_elm),
    $Debug = Elm.Debug.make(_elm),
+   $Effects = Elm.Effects.make(_elm),
    $Html = Elm.Html.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
-   $Messenger = Elm.Messenger.make(_elm),
    $Persist = Elm.Persist.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm),
+   $StartApp = Elm.StartApp.make(_elm),
    $Task = Elm.Task.make(_elm),
    $Time = Elm.Time.make(_elm),
    $Types = Elm.Types.make(_elm),
    $View = Elm.View.make(_elm);
    var _op = {};
-   var update = F2(function (mf,feedings) {
-      var feedings$ = A2($Debug.log,"before",feedings);
-      return A2($Debug.log,
-      "after",
-      function () {
-         var _p0 = mf;
-         if (_p0.ctor === "Just") {
-               var _p1 = _p0._0;
-               switch (_p1.ctor)
-               {case "Add": return A2($List._op["::"],_p1._0,feedings$);
-                  case "Delete": return A2($List.filter,F2(function (x,y) {    return !_U.eq(x,y);})(_p1._0),feedings$);
-                  default: return A2($Debug.log,"feedings\'\'",_p1._0);}
-            } else {
-               return feedings$;
-            }
-      }());
+   var everySecond = A2($Signal.map,$Types.Tick,$Time.every($Time.second));
+   var init = {ctor: "_Tuple2",_0: {feedings: _U.list([]),time: 0},_1: $Persist.restore};
+   var update = F2(function (action,_p0) {
+      var _p1 = _p0;
+      var _p5 = _p1.feedings;
+      var time$ = function () {    var _p2 = action;if (_p2.ctor === "Tick") {    return _p2._0;} else {    return _p1.time;}}();
+      var feedings$ = function () {
+         var _p3 = action;
+         switch (_p3.ctor)
+         {case "Add": return A2($List._op["::"],{ctor: "_Tuple2",_0: time$,_1: _p3._0},_p5);
+            case "Delete": return A2($List.filter,F2(function (x,y) {    return !_U.eq(x,y);})(_p3._0),_p5);
+            case "Restore": return _p3._0;
+            default: return _p5;}
+      }();
+      var model$ = {feedings: feedings$,time: time$};
+      var effects$ = function () {
+         var _p4 = action;
+         switch (_p4.ctor)
+         {case "Add": return $Persist.save(feedings$);
+            case "Delete": return $Persist.save(feedings$);
+            default: return $Effects.none;}
+      }();
+      return {ctor: "_Tuple2",_0: model$,_1: effects$};
    });
-   var save = Elm.Native.Task.make(_elm).performSignal("save",
-   A2($Signal.map,$Signal.send(function (_) {    return _.address;}($Persist.storage)),A3($Signal.foldp,update,_U.list([]),$Messenger.output)));
-   var lastDone = function () {
-      var f = F2(function (_p2,mdone) {
-         var _p3 = _p2;
-         var _p4 = mdone;
-         if (_p4.ctor === "Nothing") {
-               return _U.eq(_p3._1,$Types.Done) ? $Maybe.Just(_p3._0) : $Maybe.Nothing;
-            } else {
-               return mdone;
-            }
-      });
-      return A2($List.foldl,f,$Maybe.Nothing);
-   }();
-   var munge = F2(function (now,feedings) {    return A2($View.view,now - A2($Maybe.withDefault,now,lastDone(feedings)),feedings);});
-   var main = A3($Signal.map2,munge,$Time.every($Time.second),function (_) {    return _.signal;}($Persist.storage));
-   return _elm.Main.values = {_op: _op,lastDone: lastDone,update: update,munge: munge,main: main};
+   var app = $StartApp.start({init: init,view: $View.view,update: update,inputs: _U.list([everySecond])});
+   var tasks = Elm.Native.Task.make(_elm).performSignal("tasks",app.tasks);
+   var main = app.html;
+   return _elm.Main.values = {_op: _op,update: update,init: init,everySecond: everySecond,app: app,main: main};
 };</script></head><body><script type="text/javascript">Elm.fullscreen(Elm.Main)</script></body></html>
