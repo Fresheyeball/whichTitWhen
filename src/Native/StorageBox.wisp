@@ -26,9 +26,10 @@
         (callback (.succeed Task Tuple0)))))
 
   :storageBox (F2 (fn [key defaultValue]
-    (let [stream (.input Signal (+ "retrieve." key) null)
-          getItem (fn [] (let [x (.getItem localStorage key)]
-            (if (== x undefined) defaultValue (.parse JSON x))))
+    (let [getItem (fn [] (let [x (.getItem localStorage key)]
+            (if (== x null) defaultValue (.parse JSON x))))
+          stream (.input Signal (+ "retrieve." key) (getItem))
+
           initial (getItem)
           send (fn [value]
             (.asyncFunction Task (fn [callback]
@@ -42,10 +43,9 @@
                   0)
                 (callback (.succeed Task Tuple0))))))]
       (do
-        (.addListener localRuntime [stream.id] window "storage"
-          (fn []
-            (.notify localRuntime stream.id (getItem))))
-        (.notify localRuntime stream.id (getItem))
+        ; (.addListener localRuntime [stream.id] window "storage"
+        ;   (fn []
+        ;     (.notify localRuntime stream.id (getItem))))
         { :address { :ctor "Address"
                    , :_0   send }
         , :signal stream }))))

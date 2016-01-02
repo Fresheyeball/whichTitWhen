@@ -27,13 +27,13 @@ var make = function make(localRuntime) {
                 }),
                 'storageBox': F2(function (key, defaultValue) {
                     return function () {
-                        var streamø1 = Signalø1.input('retrieve.' + key, null);
                         var getItemø1 = function () {
                             return function () {
                                 var xø1 = localStorage.getItem(key);
-                                return xø1 == undefined ? defaultValue : JSON.parse(xø1);
+                                return xø1 == null ? defaultValue : JSON.parse(xø1);
                             }.call(this);
                         };
+                        var streamø1 = Signalø1.input('retrieve.' + key, getItemø1());
                         var initialø1 = getItemø1();
                         var sendø1 = function (value) {
                             return Taskø1.asyncFunction(function (callback) {
@@ -49,10 +49,6 @@ var make = function make(localRuntime) {
                             });
                         };
                         return (function () {
-                            localRuntime.addListener([streamø1.id], window, 'storage', function () {
-                                return localRuntime.notify(streamø1.id, getItemø1());
-                            });
-                            localRuntime.notify(streamø1.id, getItemø1());
                             return {
                                 'address': {
                                     'ctor': 'Address',
