@@ -18,13 +18,6 @@ var make = function make(localRuntime) {
         return (function () {
             foreign.sanitize(localRuntime, 'Native', 'StorageBox');
             return localRuntime.Native.StorageBox.values ? localRuntime.Native.StorageBox.values : localRuntime.Native.StorageBox.values = {
-                'save': F2(function (key, x) {
-                    return Taskø1.asyncFunction(function (callback) {
-                        return (function () {
-                            return StorageBox.setItem(x);
-                        })();
-                    }, callback(Taskø1.succeed(Tuple0ø1)));
-                }),
                 'storageBox': F2(function (key, defaultValue) {
                     return function () {
                         var getItemø1 = function () {

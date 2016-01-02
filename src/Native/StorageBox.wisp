@@ -19,12 +19,6 @@
         localRuntime.Native.StorageBox.values
         (set! localRuntime.Native.StorageBox.values {
 
-  :save (F2 (fn [key x]
-    (.asyncFunction Task (fn [callback]
-      (do
-        (.setItem StorageBox x)))
-        (callback (.succeed Task Tuple0)))))
-
   :storageBox (F2 (fn [key defaultValue]
     (let [getItem (fn [] (let [x (.getItem localStorage key)]
             (if (== x null) defaultValue (.parse JSON x))))
