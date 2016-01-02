@@ -2,15 +2,12 @@ module Main (..) where
 
 import Html exposing (Html)
 import Signal exposing (..)
-import Debug
 import View exposing (view)
 import Time
 import List
 import Types exposing (..)
-import Messenger exposing (output)
-import Persist exposing (storage)
-import Task exposing (Task)
-
+import StartApp
+import Effects exposing (Effects)
 
 lastDone : List Feeding -> Maybe Time.Time
 lastDone =
@@ -29,45 +26,22 @@ lastDone =
         List.foldl f Nothing
 
 
-update : Maybe Action -> List Feeding -> List Feeding
-update mf feedings =
-    let
-        feedings' = Debug.log "before" feedings
-    in
-        Debug.log "after"
-            <| case mf of
-                Just action ->
-                    case action of
-                        Add feeding ->
-                            feeding :: feedings'
+update : Action -> Model -> (Model, Effects Action)
+update _ _ = init
 
-                        Delete feeding ->
-                            List.filter ((/=) feeding) feedings'
+init : (Model, Effects Action)
+init =
+    ({ feedings = [], since = 0 }, Effects.none)
 
-                        Clobber feedings'' ->
-                            Debug.log "feedings''" feedings''
-
-                _ ->
-                    feedings'
-
-
-munge : Time.Time -> List Feeding -> Html
-munge now feedings =
-    view
-        (now - Maybe.withDefault now (lastDone feedings))
-        feedings
-
-
-port save : Signal (Task x ())
-port save =
-    Signal.foldp update [] (Signal.map (Debug.log "output") output)
-        |> Signal.map (Debug.log "save")
-        |> Signal.map (Signal.send (.address storage))
-
+app : StartApp.App Model
+app =
+    StartApp.start
+        { init = init
+        , view = view
+        , update = update
+        , inputs = []
+        }
 
 main : Signal Html
 main =
-    Signal.map2
-        munge
-        (Time.every Time.second)
-        (.signal storage)
+    app.html

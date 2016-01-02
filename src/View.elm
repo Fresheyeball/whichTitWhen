@@ -6,10 +6,9 @@ import Html.Events as Evt
 import Date
 import Date.Format exposing (format)
 import Types exposing (..)
+import Signal exposing (Address)
 import String
 import Time
-import Messenger
-
 
 css : Html
 css =
@@ -86,13 +85,13 @@ renderFeedings feedings =
         ]
 
 
-toolBar : Html
-toolBar =
+toolBar : Address Action -> Html
+toolBar address =
     let
-        tool text' action =
+        tool text' lactation =
             div
                 [ Attr.class "item"
-                , Evt.onClick Messenger.input action
+                , Evt.onClick address (Add lactation)
                 ]
                 [ text text' ]
     in
@@ -144,12 +143,12 @@ timer time =
             [ text formated ]
 
 
-view : Time.Time -> List Feeding -> Html
-view since feedings =
+view : Address Action -> Model -> Html
+view address {feedings, since} =
     div
         []
         [ css
-        , toolBar
+        , toolBar address
         , renderFeedings feedings
         , timer since
         ]
