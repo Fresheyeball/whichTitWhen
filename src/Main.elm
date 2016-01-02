@@ -60,7 +60,8 @@ munge now feedings =
 
 port save : Signal (Task x ())
 port save =
-    Signal.foldp update [] output
+    Signal.foldp update [] (Signal.map (Debug.log "output") output)
+        |> Signal.map (Debug.log "save")
         |> Signal.map (Signal.send (.address storage))
 
 
