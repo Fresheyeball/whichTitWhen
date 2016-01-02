@@ -3,6 +3,7 @@ module View (..) where
 import Html exposing (..)
 import Html.Attributes as Attr
 import Html.Events as Evt
+import Date
 import Date.Format exposing (format)
 import Types exposing (..)
 import String
@@ -66,7 +67,7 @@ renderFeeding ( date, action ) =
                 ]
             , td
                 []
-                [ text <| format "%d/%m/%Y %I:%M %P" date ]
+                [ text <| format "%d/%m/%Y %I:%M %P" <| Date.fromTime date ]
             ]
 
 
@@ -96,7 +97,9 @@ toolBar =
                 [ text text' ]
     in
         div
-            [ Attr.class "ui four item fixed menu" ]
+            [ Attr.class "ui four item fixed menu"
+            , Attr.style [ ( "cursor", "pointer" ) ]
+            ]
             [ tool "Left Breast" LeftBreast
             , tool "Right Breast" RightBreast
             , tool "Bottle" Bottle

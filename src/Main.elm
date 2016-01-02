@@ -6,9 +6,10 @@ import Debug
 import View exposing (view)
 import Time
 import List
-import Date
 import Types exposing (..)
 import Messenger exposing (output)
+import Persist exposing (storage)
+import Task exposing (Task)
 
 
 lastDone : List Feeding -> Maybe Time.Time
@@ -18,7 +19,7 @@ lastDone =
             case mdone of
                 Nothing ->
                     if action == Done then
-                        Just (Date.toTime date)
+                        Just date
                     else
                         Nothing
 
@@ -28,12 +29,20 @@ lastDone =
         List.foldl f Nothing
 
 
-update : Maybe Feeding -> List Feeding -> List Feeding
+update : Maybe Action -> List Feeding -> List Feeding
 update mf feedings =
-    Debug.watch "Model"
+    Debug.log "Model"
         <| case mf of
-            Just feeding ->
-                feeding :: feedings
+            Just action ->
+                case action of
+                    Add feeding ->
+                        feeding :: feedings
+
+                    Delete feeding ->
+                        List.filter ((/=) feeding) feedings
+
+                    Clobber feedings' ->
+                        feedings'
 
             _ ->
                 feedings
@@ -42,8 +51,14 @@ update mf feedings =
 munge : Time.Time -> List Feeding -> Html
 munge now feedings =
     view
-        (now - Maybe.withDefault now (lastDone feedings))
+        (Debug.log "now" now - Maybe.withDefault now (Debug.log "lastDone" (lastDone feedings)))
         feedings
+
+
+port save : Signal (Task x ())
+port save =
+    Signal.foldp update [] output
+        |> Signal.map (Signal.send (.address storage))
 
 
 main : Signal Html
@@ -51,4 +66,4 @@ main =
     Signal.map2
         munge
         (Time.every Time.second)
-        (Signal.foldp update [] output)
+        (.signal storage)

@@ -28,19 +28,21 @@
   :storageBox (F2 (fn [key defaultValue]
     (let [stream (.input Signal (+ "retrieve." key) null)
           getItem (fn [] (let [x (.getItem localStorage key)]
-            (if (== x undefined) x defaultValue)))
+            (if (== x undefined) defaultValue (.parse JSON x))))
           initial (getItem)
-          send (fn []
+          send (fn [value]
             (.asyncFunction Task (fn [callback]
               (do
                 (.setTimeout localRuntime
                   (fn []
-                    (.notify localRuntime stream.id (getItem)))
+                    (if (not (== value defaultValue))
+                      (do
+                        (.setItem localStorage key (.stringify JSON value))
+                        (.notify localRuntime stream.id (getItem)))))
                   0)
-                (.setItem localStorage key (getItem))
                 (callback (.succeed Task Tuple0))))))]
       (do
-        (.addEventListener localRuntime [stream.id] window "storage"
+        (.addListener localRuntime [stream.id] window "storage"
           (fn []
             (.notify localRuntime stream.id (getItem))))
         (.notify localRuntime stream.id (getItem))

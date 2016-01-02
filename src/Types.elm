@@ -1,9 +1,9 @@
 module Types (..) where
 
-import Date
+import Time
 
 
-type Action
+type Lactation
     = LeftBreast
     | RightBreast
     | Bottle
@@ -11,4 +11,10 @@ type Action
 
 
 type alias Feeding =
-    ( Date.Date, Action )
+    ( Time.Time, Lactation )
+
+
+type Action
+    = Add Feeding
+    | Delete Feeding
+    | Clobber (List Feeding)

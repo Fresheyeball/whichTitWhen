@@ -31,23 +31,25 @@ var make = function make(localRuntime) {
                         var getItemø1 = function () {
                             return function () {
                                 var xø1 = localStorage.getItem(key);
-                                return xø1 == undefined ? xø1 : defaultValue;
+                                return xø1 == undefined ? defaultValue : JSON.parse(xø1);
                             }.call(this);
                         };
                         var initialø1 = getItemø1();
-                        var sendø1 = function () {
+                        var sendø1 = function (value) {
                             return Taskø1.asyncFunction(function (callback) {
                                 return (function () {
                                     localRuntime.setTimeout(function () {
-                                        return localRuntime.notify(streamø1.id, getItemø1());
+                                        return !(value == defaultValue) ? (function () {
+                                            localStorage.setItem(key, JSON.stringify(value));
+                                            return localRuntime.notify(streamø1.id, getItemø1());
+                                        })() : void 0;
                                     }, 0);
-                                    localStorage.setItem(key, getItemø1());
                                     return callback(Taskø1.succeed(Tuple0ø1));
                                 })();
                             });
                         };
                         return (function () {
-                            localRuntime.addEventListener([streamø1.id], window, 'storage', function () {
+                            localRuntime.addListener([streamø1.id], window, 'storage', function () {
                                 return localRuntime.notify(streamø1.id, getItemø1());
                             });
                             localRuntime.notify(streamø1.id, getItemø1());

@@ -15,5 +15,10 @@ type alias StorageKey =
 
 
 storageBox : StorageKey -> a -> StorageBox a
-storageBox =
-    Native.StorageBox.storageBox
+storageBox key a =
+    let
+        box = Native.StorageBox.storageBox key a
+    in
+        { box
+            | signal = Signal.dropRepeats (.signal box)
+        }
