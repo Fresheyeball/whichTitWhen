@@ -6,9 +6,9 @@ import Html.Events as Evt
 import Date
 import Date.Format exposing (format)
 import Types exposing (..)
+import Signal exposing (Address)
 import String
 import Time
-import Messenger
 
 
 css : Html
@@ -86,13 +86,13 @@ renderFeedings feedings =
         ]
 
 
-toolBar : Html
-toolBar =
+toolBar : Address Action -> Html
+toolBar address =
     let
-        tool text' action =
+        tool text' lactation =
             div
                 [ Attr.class "item"
-                , Evt.onClick Messenger.input action
+                , Evt.onClick address (Add lactation)
                 ]
                 [ text text' ]
     in
@@ -144,12 +144,33 @@ timer time =
             [ text formated ]
 
 
-view : Time.Time -> List Feeding -> Html
-view since feedings =
+since : List Feeding -> Time.Time -> Time.Time
+since feedings now =
+    let
+        lastDone =
+            let
+                f ( date, action ) mdone =
+                    case mdone of
+                        Nothing ->
+                            if action == Done then
+                                Just date
+                            else
+                                Nothing
+
+                        _ ->
+                            mdone
+            in
+                List.foldl f Nothing
+    in
+        now - Maybe.withDefault now (lastDone feedings)
+
+
+view : Address Action -> Model -> Html
+view address { feedings, time } =
     div
         []
         [ css
-        , toolBar
+        , toolBar address
         , renderFeedings feedings
-        , timer since
+        , timer (since feedings time)
         ]

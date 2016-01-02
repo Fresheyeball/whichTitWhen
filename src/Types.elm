@@ -15,6 +15,13 @@ type alias Feeding =
 
 
 type Action
-    = Add Feeding
-    | Delete Feeding
-    | Clobber (List Feeding)
+    = Add Lactation
+    | Tick Time.Time
+    | Restore (List Feeding)
+    | NoOp
+
+
+type alias Model =
+    { feedings : List Feeding
+    , time : Time.Time
+    }

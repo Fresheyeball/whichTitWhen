@@ -2,72 +2,74 @@ module Main (..) where
 
 import Html exposing (Html)
 import Signal exposing (..)
-import Debug
 import View exposing (view)
 import Time
 import List
 import Types exposing (..)
-import Messenger exposing (output)
-import Persist exposing (storage)
-import Task exposing (Task)
+import StartApp
+import Persist
+import Effects exposing (Effects)
 
 
-lastDone : List Feeding -> Maybe Time.Time
-lastDone =
+update : Action -> Model -> ( Model, Effects Action )
+update action { feedings, time } =
     let
-        f ( date, action ) mdone =
-            case mdone of
-                Nothing ->
-                    if action == Done then
-                        Just date
-                    else
-                        Nothing
+        feedings' =
+            case action of
+                Add lactation ->
+                    ( time', lactation ) :: feedings
+
+                Restore feedingsFromStorage ->
+                    Debug.log "restored" feedingsFromStorage
 
                 _ ->
-                    mdone
-    in
-        List.foldl f Nothing
+                    feedings
 
-
-update : Maybe Action -> List Feeding -> List Feeding
-update mf feedings =
-    let
-        feedings' = Debug.log "before" feedings
-    in
-        Debug.log "after"
-            <| case mf of
-                Just action ->
-                    case action of
-                        Add feeding ->
-                            feeding :: feedings'
-
-                        Delete feeding ->
-                            List.filter ((/=) feeding) feedings'
-
-                        Clobber feedings'' ->
-                            Debug.log "feedings''" feedings''
+        time' =
+            case action of
+                Tick now ->
+                    now
 
                 _ ->
-                    feedings'
+                    time
+
+        model' =
+            { feedings = feedings'
+            , time = time'
+            }
+
+        effects' =
+            case action of
+                Add _ ->
+                    Persist.save (.feedings model')
+
+                _ ->
+                    Effects.none
+    in
+        ( model', effects' )
 
 
-munge : Time.Time -> List Feeding -> Html
-munge now feedings =
-    view
-        (now - Maybe.withDefault now (lastDone feedings))
-        feedings
+init : ( Model, Effects Action )
+init =
+    ( { feedings = [], time = 0 }, Persist.restore )
 
 
-port save : Signal (Task x ())
-port save =
-    Signal.foldp update [] (Signal.map (Debug.log "output") output)
-        |> Signal.map (Debug.log "save")
-        |> Signal.map (Signal.send (.address storage))
+everySecond : Signal Action
+everySecond =
+    Time.every Time.second
+        |> Signal.map Tick
+
+
+app : StartApp.App Model
+app =
+    StartApp.start
+        { init = init
+        , view = view
+        , update = update
+        , inputs = [ everySecond ]
+        }
 
 
 main : Signal Html
 main =
-    Signal.map2
-        munge
-        (Time.every Time.second)
-        (.signal storage)
+    app.html
