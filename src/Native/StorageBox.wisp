@@ -43,9 +43,8 @@
                   0)
                 (callback (.succeed Task Tuple0))))))]
       (do
-        ; (.addListener localRuntime [stream.id] window "storage"
-        ;   (fn []
-        ;     (.notify localRuntime stream.id (getItem))))
+        (.addListener localRuntime [stream.id] window "storage" (fn []
+          (.notify localRuntime stream.id (getItem))))
         { :address { :ctor "Address"
                    , :_0   send }
         , :signal stream }))))

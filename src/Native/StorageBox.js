@@ -49,6 +49,9 @@ var make = function make(localRuntime) {
                             });
                         };
                         return (function () {
+                            localRuntime.addListener([streamø1.id], window, 'storage', function () {
+                                return localRuntime.notify(streamø1.id, getItemø1());
+                            });
                             return {
                                 'address': {
                                     'ctor': 'Address',

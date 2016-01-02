@@ -31,21 +31,24 @@ lastDone =
 
 update : Maybe Action -> List Feeding -> List Feeding
 update mf feedings =
-    Debug.log "Model"
-        <| case mf of
-            Just action ->
-                case action of
-                    Add feeding ->
-                        feeding :: feedings
+    let
+        feedings' = Debug.log "before" feedings
+    in
+        Debug.log "after"
+            <| case mf of
+                Just action ->
+                    case action of
+                        Add feeding ->
+                            feeding :: feedings'
 
-                    Delete feeding ->
-                        List.filter ((/=) feeding) feedings
+                        Delete feeding ->
+                            List.filter ((/=) feeding) feedings'
 
-                    Clobber feedings' ->
-                        feedings'
+                        Clobber feedings'' ->
+                            feedings''
 
-            _ ->
-                feedings
+                _ ->
+                    feedings'
 
 
 munge : Time.Time -> List Feeding -> Html

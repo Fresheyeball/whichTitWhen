@@ -5,6 +5,7 @@ import Types exposing (Lactation, Feeding, Action(..))
 import Persist exposing (storage)
 import Maybe
 import Time
+import Debug
 
 
 messenger : Mailbox (Maybe Lactation)
@@ -33,6 +34,6 @@ output =
 
         clobber =
             .signal storage
-                |> Signal.map (Clobber >> Just)
+                |> Signal.map (Clobber >> Just >> Debug.log "Clobber")
     in
-        Signal.merge add clobber
+        Signal.map (Debug.log "Actions") <| Signal.merge add clobber
