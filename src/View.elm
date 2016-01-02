@@ -77,7 +77,7 @@ renderFeeding address ( time, lactation ) =
                     ( "Finished", "star" )
     in
         tr
-            []
+            [ Attr.style [ ( "background", lactationColor lactation ), ( "color", "white" ) ] ]
             [ td
                 [ Attr.class "collapsing" ]
                 [ i
@@ -115,12 +115,29 @@ renderFeedings address feedings =
         ]
 
 
+lactationColor : Lactation -> String
+lactationColor lac =
+    case lac of
+        LeftBreast ->
+            "#2185d0"
+
+        RightBreast ->
+            "#a333c8"
+
+        Bottle ->
+            "#f2711c"
+
+        Done ->
+            "#767676"
+
+
 toolBar : Address Action -> Html
 toolBar address =
     let
         tool text' lactation =
             div
-                [ Attr.class "item"
+                [ Attr.class ("item inverted")
+                , Attr.style [ ( "color", "white" ), ( "background", lactationColor lactation ) ]
                 , Evt.onClick address (Add lactation)
                 ]
                 [ text text' ]
