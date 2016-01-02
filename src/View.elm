@@ -55,6 +55,7 @@ mobile =
         []
         [ meta "viewport" "width=device-width, initial-scale=1"
         , meta "apple-mobile-web-app-capable" "yes"
+        , node "link" [ Attr.rel "apple-touch-icon", Attr.href "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Breastfeeding-icon-med.svg/2000px-Breastfeeding-icon-med.svg.png" ] []
         ]
 
 
