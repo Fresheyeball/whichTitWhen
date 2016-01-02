@@ -1,24 +1,18 @@
-module StorageBox (StorageKey, storageBox, StorageBox) where
+module LocalStorage (..) where
 
-import Native.StorageBox
-import Signal
-
-
-type alias StorageBox a =
-    { address : Signal.Address a
-    , signal : Signal.Signal a
-    }
+import Native.LocalStorage
+import Task exposing (Task)
 
 
-type alias StorageKey =
+type alias Key =
     String
 
 
-storageBox : StorageKey -> a -> StorageBox a
-storageBox key a =
-    let
-        box = Native.StorageBox.storageBox key a
-    in
-        { box
-            | signal = Signal.dropRepeats (.signal box)
-        }
+get : Key -> Task String String
+get =
+    Native.LocalStorage.get
+
+
+set : Key -> String -> Task x ()
+set =
+    Native.LocalStorage.set

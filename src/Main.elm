@@ -7,7 +7,9 @@ import Time
 import List
 import Types exposing (..)
 import StartApp
+import Persist
 import Effects exposing (Effects)
+
 
 lastDone : List Feeding -> Maybe Time.Time
 lastDone =
@@ -26,12 +28,54 @@ lastDone =
         List.foldl f Nothing
 
 
-update : Action -> Model -> (Model, Effects Action)
-update _ _ = init
+update : Action -> Model -> ( Model, Effects Action )
+update action { feedings, since } =
+    let
+        feedings' =
+            case action of
+                Add lactation ->
+                    ( since, lactation ) :: feedings
 
-init : (Model, Effects Action)
+                Clobber feedingsFromStorage ->
+                    feedingsFromStorage
+
+                _ ->
+                    feedings
+
+        since' =
+            case action of
+                Tick now ->
+                    now - Maybe.withDefault now (lastDone feedings')
+
+                _ ->
+                    since
+
+        model =
+            { feedings = feedings'
+            , since = since'
+            }
+
+        effects =
+            case action of
+                Add _ ->
+                    Persist.save model
+
+                _ ->
+                    Effects.none
+    in
+        ( model, effects )
+
+
+init : ( Model, Effects Action )
 init =
-    ({ feedings = [], since = 0 }, Effects.none)
+    ( { feedings = [], since = 0 }, Persist.restore )
+
+
+everySecond : Signal Action
+everySecond =
+    Time.every Time.second
+        |> Signal.map Tick
+
 
 app : StartApp.App Model
 app =
@@ -39,8 +83,9 @@ app =
         { init = init
         , view = view
         , update = update
-        , inputs = []
+        , inputs = [ everySecond ]
         }
+
 
 main : Signal Html
 main =

@@ -18,11 +18,11 @@ var make = function make(localRuntime) {
         return (function () {
             foreign.sanitize(localRuntime, 'Native', 'LocalStorage');
             return localRuntime.Native.LocalStorage.values ? localRuntime.Native.LocalStorage.values : localRuntime.Native.LocalStorage.values = {
-                'get': F2(function (err, key) {
+                'get': F2(function (key) {
                     return Taskø1.asyncFunction(function (callback) {
                         return function () {
                             var xø1 = localStorage.getItem(key);
-                            callback(xø1 == null ? Taskø1.fail(err) : void 0);
+                            callback(xø1 == null ? Taskø1.fail('Key not found') : void 0);
                             return Taskø1.succeed(xø1);
                         }.call(this);
                     });

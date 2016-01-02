@@ -20,6 +20,8 @@ type Action
     | Clobber (List Feeding)
     | NoOp
 
+
 type alias Model =
     { feedings : List Feeding
-    , since : Time.Time }
+    , since : Time.Time
+    }

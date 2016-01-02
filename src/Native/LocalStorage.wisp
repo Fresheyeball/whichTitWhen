@@ -19,11 +19,11 @@
         localRuntime.Native.LocalStorage.values
         (set! localRuntime.Native.LocalStorage.values {
 
-  :get (F2 (fn [err key]
+  :get (F2 (fn [key]
     (.asyncFunction Task (fn [callback]
       (let [x (.getItem localStorage key)]
         (callback (if (== x null)
-          (.fail Task err)))
+          (.fail Task "Key not found")))
           (.succeed Task x))))))
 
   :set (F2 (fn [key values]
