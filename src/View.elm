@@ -110,9 +110,13 @@ toolBar =
 timer : Time.Time -> Html
 timer time =
     let
-        showTime =
-            toString
-                >> \i ->
+        showTime inUnits moder =
+            time
+                |> inUnits
+                |> floor
+                |> (\x -> x % moder)
+                |> toString
+                |> \i ->
                     if String.length i < 2 then
                         "0" ++ i
                     else
@@ -121,12 +125,9 @@ timer time =
         formated =
             String.join
                 ":"
-                [ showTime
-                    (floor (Time.inHours time) % 24)
-                , showTime
-                    (floor (Time.inMinutes time) % 60)
-                , showTime
-                    (floor (Time.inSeconds time) % 60)
+                [ showTime Time.inHours 24
+                , showTime Time.inMinutes 60
+                , showTime Time.inSeconds 60
                 ]
 
         style =
