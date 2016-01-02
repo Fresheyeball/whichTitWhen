@@ -11137,9 +11137,21 @@ Elm.View.make = function (_elm) {
       var formated = A2($String.join,":",_U.list([A2(showTime,$Time.inHours,24),A2(showTime,$Time.inMinutes,60),A2(showTime,$Time.inSeconds,60)]));
       return A2($Html.div,_U.list([$Html$Attributes.$class("ui item header"),$Html$Attributes.style(style)]),_U.list([$Html.text(formated)]));
    };
+   var lactationColor = function (lac) {
+      var _p3 = lac;
+      switch (_p3.ctor)
+      {case "LeftBreast": return "#2185d0";
+         case "RightBreast": return "#a333c8";
+         case "Bottle": return "#f2711c";
+         default: return "#767676";}
+   };
    var toolBar = function (address) {
       var tool = F2(function (text$,lactation) {
-         return A2($Html.div,_U.list([$Html$Attributes.$class("item"),A2($Html$Events.onClick,address,$Types.Add(lactation))]),_U.list([$Html.text(text$)]));
+         return A2($Html.div,
+         _U.list([$Html$Attributes.$class("item inverted")
+                 ,$Html$Attributes.style(_U.list([{ctor: "_Tuple2",_0: "color",_1: "white"},{ctor: "_Tuple2",_0: "background",_1: lactationColor(lactation)}]))
+                 ,A2($Html$Events.onClick,address,$Types.Add(lactation))]),
+         _U.list([$Html.text(text$)]));
       });
       return A2($Html.div,
       _U.list([$Html$Attributes.$class("ui four item fixed menu"),$Html$Attributes.style(_U.list([{ctor: "_Tuple2",_0: "cursor",_1: "pointer"}]))]),
@@ -11148,32 +11160,32 @@ Elm.View.make = function (_elm) {
               ,A2(tool,"Bottle",$Types.Bottle)
               ,A2(tool,"Done",$Types.Done)]));
    };
-   var renderFeeding = F2(function (address,_p3) {
-      var _p4 = _p3;
-      var _p8 = _p4._0;
-      var _p7 = _p4._1;
-      var _p5 = function () {
-         var _p6 = _p7;
-         switch (_p6.ctor)
+   var renderFeeding = F2(function (address,_p4) {
+      var _p5 = _p4;
+      var _p9 = _p5._0;
+      var _p8 = _p5._1;
+      var _p6 = function () {
+         var _p7 = _p8;
+         switch (_p7.ctor)
          {case "LeftBreast": return {ctor: "_Tuple2",_0: "Left",_1: "caret left"};
             case "RightBreast": return {ctor: "_Tuple2",_0: "Right",_1: "caret right"};
             case "Bottle": return {ctor: "_Tuple2",_0: "Bottle",_1: "caret up"};
             default: return {ctor: "_Tuple2",_0: "Finished",_1: "star"};}
       }();
-      var message = _p5._0;
-      var icon = _p5._1;
+      var message = _p6._0;
+      var icon = _p6._1;
       return A2($Html.tr,
-      _U.list([]),
+      _U.list([$Html$Attributes.style(_U.list([{ctor: "_Tuple2",_0: "background",_1: lactationColor(_p8)},{ctor: "_Tuple2",_0: "color",_1: "white"}]))]),
       _U.list([A2($Html.td,
               _U.list([$Html$Attributes.$class("collapsing")]),
               _U.list([A2($Html.i,_U.list([$Html$Attributes.$class(A2($Basics._op["++"],"icon ",icon))]),_U.list([])),$Html.text(message)]))
-              ,A2($Html.td,_U.list([]),_U.list([$Html.text(A2($Date$Format.format,"%d/%m/%Y %I:%M %P",$Date.fromTime(_p8)))]))
+              ,A2($Html.td,_U.list([]),_U.list([$Html.text(A2($Date$Format.format,"%d/%m/%Y %I:%M %P",$Date.fromTime(_p9)))]))
               ,A2($Html.td,
               _U.list([$Html$Attributes.$class("collapsing")]),
               _U.list([A2($Html.i,
               _U.list([$Html$Attributes.$class("icon x")
                       ,$Html$Attributes.style(_U.list([{ctor: "_Tuple2",_0: "cursor",_1: "pointer"}]))
-                      ,A2($Html$Events.onClick,address,$Types.Delete({ctor: "_Tuple2",_0: _p8,_1: _p7}))]),
+                      ,A2($Html$Events.onClick,address,$Types.Delete({ctor: "_Tuple2",_0: _p9,_1: _p8}))]),
               _U.list([]))]))]));
    });
    var renderFeedings = F2(function (address,feedings) {
@@ -11202,10 +11214,10 @@ Elm.View.make = function (_elm) {
       };
       return A2($Html.div,_U.list([]),_U.list([link$("semantic"),link$("components/table"),link$("components/icon"),link$("components/menu")]));
    }();
-   var view = F2(function (address,_p9) {
-      var _p10 = _p9;
-      var _p11 = _p10.feedings;
-      return A2($Html.div,_U.list([]),_U.list([mobile,css,toolBar(address),A2(renderFeedings,address,_p11),timer(A2(since,_p11,_p10.time))]));
+   var view = F2(function (address,_p10) {
+      var _p11 = _p10;
+      var _p12 = _p11.feedings;
+      return A2($Html.div,_U.list([]),_U.list([mobile,css,toolBar(address),A2(renderFeedings,address,_p12),timer(A2(since,_p12,_p11.time))]));
    });
    return _elm.View.values = {_op: _op
                              ,css: css
@@ -11213,6 +11225,7 @@ Elm.View.make = function (_elm) {
                              ,mobile: mobile
                              ,renderFeeding: renderFeeding
                              ,renderFeedings: renderFeedings
+                             ,lactationColor: lactationColor
                              ,toolBar: toolBar
                              ,timer: timer
                              ,since: since
