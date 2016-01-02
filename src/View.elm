@@ -154,6 +154,7 @@ timer time =
             , ( "left", "0" )
             , ( "position", "fixed" )
             , ( "padding", "15px" )
+            , ( "background", "white" )
             ]
     in
         div
