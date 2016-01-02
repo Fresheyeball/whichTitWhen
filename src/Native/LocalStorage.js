@@ -18,7 +18,7 @@ var make = function make(localRuntime) {
         return (function () {
             foreign.sanitize(localRuntime, 'Native', 'LocalStorage');
             return localRuntime.Native.LocalStorage.values ? localRuntime.Native.LocalStorage.values : localRuntime.Native.LocalStorage.values = {
-                'get': F2(function (key) {
+                'get': function (key) {
                     return Taskø1.asyncFunction(function (callback) {
                         return function () {
                             var xø1 = localStorage.getItem(key);
@@ -26,15 +26,18 @@ var make = function make(localRuntime) {
                             return Taskø1.succeed(xø1);
                         }.call(this);
                     });
-                }),
+                },
                 'set': F2(function (key, values) {
-                    return Taskø1.asyncFunction(function (callback) {
-                        return (function () {
-                            console.log('native set', key, value);
-                            localStorage.setItem(key, value);
-                            return callback(Taskø1.succeed(Tuple0ø1));
-                        })();
-                    });
+                    return (function () {
+                        console.log('pre native set task');
+                        return Taskø1.asyncFunction(function (callback) {
+                            return (function () {
+                                console.log('native set', key, value);
+                                localStorage.setItem(key, value);
+                                return callback(Taskø1.succeed(Tuple0ø1));
+                            })();
+                        });
+                    })();
                 })
             };
         })();

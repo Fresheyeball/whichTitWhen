@@ -18,7 +18,7 @@ type Action
     = Add Lactation
     | Tick Time.Time
     | Restore (List Feeding)
-    | NoOp ()
+    | NoOp
 
 
 type alias Model =

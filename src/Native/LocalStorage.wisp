@@ -19,19 +19,21 @@
         localRuntime.Native.LocalStorage.values
         (set! localRuntime.Native.LocalStorage.values {
 
-  :get (F2 (fn [key]
+  :get (fn [key]
     (.asyncFunction Task (fn [callback]
       (let [x (.getItem localStorage key)]
         (callback (if (== x null)
           (.fail Task "Key not found")))
-          (.succeed Task x))))))
+          (.succeed Task x)))))
 
   :set (F2 (fn [key values]
-    (.asyncFunction Task (fn [callback]
-      (do
-        (.log console "native set" key value)
-        (.setItem localStorage key value)
-        (callback (.succeed Task Tuple0)))))))
+    (do
+        (.log console "pre native set task")
+        (.asyncFunction Task (fn [callback]
+          (do
+            (.log console "native set" key value)
+            (.setItem localStorage key value)
+            (callback (.succeed Task Tuple0))))))))
 
   } )))))
 

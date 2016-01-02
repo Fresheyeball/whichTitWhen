@@ -31,7 +31,7 @@ save feedings =
                     |> Encode.encode 0
     in
         LocalStorage.set key feedings'
-            |> Task.map NoOp
+            |> Task.map (always NoOp)
             |> Effects.task
 
 
@@ -79,6 +79,6 @@ restore =
                             Restore feedings
 
                         _ ->
-                            NoOp ()
+                            NoOp
                 )
             |> Effects.task
