@@ -7,7 +7,7 @@ import Date.Format exposing (format)
 import Types exposing (..)
 import String
 import Time
-import Messanger
+import Messenger
 
 
 css : Html
@@ -91,7 +91,7 @@ toolBar =
         tool text' action =
             div
                 [ Attr.class "item"
-                , Evt.onClick Messanger.input action
+                , Evt.onClick Messenger.input action
                 ]
                 [ text text' ]
     in

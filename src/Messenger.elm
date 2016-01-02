@@ -1,7 +1,8 @@
-module Messanger (input, output) where
+module Messenger (input, output) where
 
 import Signal exposing (Mailbox, mailbox)
 import Types exposing (Action, Feeding)
+import StorageBox exposing (..)
 import Maybe
 import Time
 import Date

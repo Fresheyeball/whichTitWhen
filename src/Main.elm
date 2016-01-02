@@ -8,7 +8,7 @@ import Time
 import List
 import Date
 import Types exposing (..)
-import Messanger exposing (output)
+import Messenger exposing (output)
 
 
 lastDone : List Feeding -> Maybe Time.Time
@@ -30,12 +30,13 @@ lastDone =
 
 update : Maybe Feeding -> List Feeding -> List Feeding
 update mf feedings =
-    case mf of
-        Just feeding ->
-            feeding :: feedings
+    Debug.watch "Model"
+        <| case mf of
+            Just feeding ->
+                feeding :: feedings
 
-        _ ->
-            feedings
+            _ ->
+                feedings
 
 
 munge : Time.Time -> List Feeding -> Html
@@ -50,6 +51,4 @@ main =
     Signal.map2
         munge
         (Time.every Time.second)
-        (Signal.foldp update [] output
-            |> Debug.watch "Model"
-        )
+        (Signal.foldp update [] output)
