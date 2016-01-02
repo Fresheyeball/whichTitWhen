@@ -10,6 +10,7 @@ import Signal exposing (Address)
 import String
 import Time
 
+
 css : Html
 css =
     let
@@ -143,12 +144,33 @@ timer time =
             [ text formated ]
 
 
+since : List Feeding -> Time.Time -> Time.Time
+since feedings now =
+    let
+        lastDone =
+            let
+                f ( date, action ) mdone =
+                    case mdone of
+                        Nothing ->
+                            if action == Done then
+                                Just date
+                            else
+                                Nothing
+
+                        _ ->
+                            mdone
+            in
+                List.foldl f Nothing
+    in
+        now - Maybe.withDefault now (lastDone feedings)
+
+
 view : Address Action -> Model -> Html
-view address {feedings, since} =
+view address { feedings, time } =
     div
         []
         [ css
         , toolBar address
         , renderFeedings feedings
-        , timer since
+        , timer (since feedings time)
         ]

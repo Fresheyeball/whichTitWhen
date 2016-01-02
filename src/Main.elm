@@ -11,30 +11,13 @@ import Persist
 import Effects exposing (Effects)
 
 
-lastDone : List Feeding -> Maybe Time.Time
-lastDone =
-    let
-        f ( date, action ) mdone =
-            case mdone of
-                Nothing ->
-                    if action == Done then
-                        Just date
-                    else
-                        Nothing
-
-                _ ->
-                    mdone
-    in
-        List.foldl f Nothing
-
-
 update : Action -> Model -> ( Model, Effects Action )
-update action { feedings, since } =
+update action { feedings, time } =
     let
         feedings' =
             case action of
                 Add lactation ->
-                    ( since, lactation ) :: feedings
+                    ( time', lactation ) :: feedings
 
                 Clobber feedingsFromStorage ->
                     feedingsFromStorage
@@ -42,23 +25,23 @@ update action { feedings, since } =
                 _ ->
                     feedings
 
-        since' =
+        time' =
             case action of
                 Tick now ->
-                    now - Maybe.withDefault now (lastDone feedings')
+                    now
 
                 _ ->
-                    since
+                    time
 
         model =
             { feedings = feedings'
-            , since = since'
+            , time = time'
             }
 
         effects =
             case action of
                 Add _ ->
-                    Persist.save model
+                    Persist.save (.feedings model)
 
                 _ ->
                     Effects.none
@@ -68,7 +51,7 @@ update action { feedings, since } =
 
 init : ( Model, Effects Action )
 init =
-    ( { feedings = [], since = 0 }, Persist.restore )
+    ( { feedings = [], time = 0 }, Persist.restore )
 
 
 everySecond : Signal Action

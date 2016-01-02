@@ -23,5 +23,5 @@ type Action
 
 type alias Model =
     { feedings : List Feeding
-    , since : Time.Time
+    , time : Time.Time
     }

@@ -1,4 +1,4 @@
-module Persist (..) where
+module Persist (save, restore) where
 
 import LocalStorage exposing (..)
 import Types exposing (..)
@@ -14,12 +14,12 @@ key =
     "whichTitWhen"
 
 
-save : Model -> Effects Action
-save { feedings, since } =
+save : List Feeding -> Effects Action
+save feedings =
     let
         (=>) = (,)
 
-        model =
+        feedings' =
             let
                 encodeFeeding ( time, lactation ) =
                     Encode.object
@@ -29,11 +29,10 @@ save { feedings, since } =
             in
                 Encode.object
                     [ "feedings" => Encode.list (List.map encodeFeeding feedings)
-                    , "since" => Encode.float since
                     ]
                     |> Encode.encode 0
     in
-        set key model
+        set key feedings'
             |> Effects.task
             |> Effects.map (always NoOp)
 
@@ -70,20 +69,17 @@ restore =
                     decodeTup
                     decodeLactation
 
-        decodeModel : String -> Result String Model
+        decodeModel : String -> Result String (List Feeding)
         decodeModel =
             Json.Decode.decodeString
-                <| Json.Decode.object2
-                    Model
-                    ("feedings" := Json.Decode.list decodeFeeding)
-                    ("since" := Json.Decode.float)
+                <| ("feedings" := Json.Decode.list decodeFeeding)
     in
         Task.toResult (get key)
             |> Task.map
                 (\result ->
                     case result `Result.andThen` decodeModel of
-                        Ok model ->
-                            Clobber (.feedings model)
+                        Ok feedings ->
+                            Clobber feedings
 
                         _ ->
                             NoOp
