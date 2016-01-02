@@ -69,7 +69,7 @@ restore =
 
         decodeModel =
             Json.Decode.decodeString
-                <| ("feedings" := Json.Decode.list decodeFeeding)
+                <| Json.Decode.list decodeFeeding
     in
         Task.toResult (LocalStorage.get key)
             |> Task.map
