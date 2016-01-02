@@ -21,19 +21,16 @@
 
   :get (fn [key]
     (.asyncFunction Task (fn [callback]
-      (let [x (.getItem localStorage key)]
-        (callback (if (== x null)
-          (.fail Task "Key not found")))
-          (.succeed Task x)))))
+        (let [x (.getItem localStorage key)]
+            (callback (if (== x null)
+                (.fail Task "Key not found")
+                (.succeed Task x)))))))
 
-  :set (F2 (fn [key values]
-    (do
-        (.log console "pre native set task")
-        (.asyncFunction Task (fn [callback]
-          (do
-            (.log console "native set" key value)
+  :set (F2 (fn [key value]
+    (.asyncFunction Task (fn [callback]
+        (do
             (.setItem localStorage key value)
-            (callback (.succeed Task Tuple0))))))))
+            (callback (.succeed Task Tuple0)))))))
 
   } )))))
 
