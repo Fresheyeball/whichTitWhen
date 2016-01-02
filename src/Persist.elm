@@ -61,7 +61,7 @@ restore =
                             Ok ( time, Done )
 
                         _ ->
-                            Err "Laction Decode Failed"
+                            Err "Lactation Decode Failed"
             in
                 Json.Decode.customDecoder
                     decodeTup
