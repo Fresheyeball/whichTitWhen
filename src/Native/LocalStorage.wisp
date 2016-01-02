@@ -29,6 +29,7 @@
   :set (F2 (fn [key values]
     (.asyncFunction Task (fn [callback]
       (do
+        (.log console "native set" key value)
         (.setItem localStorage key value)
         (callback (.succeed Task Tuple0)))))))
 

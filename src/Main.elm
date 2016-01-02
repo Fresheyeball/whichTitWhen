@@ -19,8 +19,8 @@ update action { feedings, time } =
                 Add lactation ->
                     ( time', lactation ) :: feedings
 
-                Clobber feedingsFromStorage ->
-                    feedingsFromStorage
+                Restore feedingsFromStorage ->
+                    Debug.log "restored" feedingsFromStorage
 
                 _ ->
                     feedings
@@ -33,20 +33,20 @@ update action { feedings, time } =
                 _ ->
                     time
 
-        model =
+        model' =
             { feedings = feedings'
             , time = time'
             }
 
-        effects =
+        effects' =
             case action of
                 Add _ ->
-                    Persist.save (.feedings model)
+                    Persist.save (.feedings model')
 
                 _ ->
                     Effects.none
     in
-        ( model, effects )
+        ( model', effects' )
 
 
 init : ( Model, Effects Action )

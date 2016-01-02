@@ -17,8 +17,8 @@ type alias Feeding =
 type Action
     = Add Lactation
     | Tick Time.Time
-    | Clobber (List Feeding)
-    | NoOp
+    | Restore (List Feeding)
+    | NoOp ()
 
 
 type alias Model =

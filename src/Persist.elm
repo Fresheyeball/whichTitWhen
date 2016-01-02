@@ -1,6 +1,6 @@
 module Persist (save, restore) where
 
-import LocalStorage exposing (..)
+import LocalStorage
 import Types exposing (..)
 import Effects exposing (Effects)
 import Task
@@ -27,14 +27,12 @@ save feedings =
                         , "time" => Encode.float time
                         ]
             in
-                Encode.object
-                    [ "feedings" => Encode.list (List.map encodeFeeding feedings)
-                    ]
+                Encode.list (List.map encodeFeeding feedings)
                     |> Encode.encode 0
     in
-        set key feedings'
+        LocalStorage.set key feedings'
+            |> Task.map NoOp
             |> Effects.task
-            |> Effects.map (always NoOp)
 
 
 restore : Effects Action
@@ -69,19 +67,18 @@ restore =
                     decodeTup
                     decodeLactation
 
-        decodeModel : String -> Result String (List Feeding)
         decodeModel =
             Json.Decode.decodeString
                 <| ("feedings" := Json.Decode.list decodeFeeding)
     in
-        Task.toResult (get key)
+        Task.toResult (LocalStorage.get key)
             |> Task.map
                 (\result ->
-                    case result `Result.andThen` decodeModel of
+                    case Debug.log "result" result `Result.andThen` decodeModel of
                         Ok feedings ->
-                            Clobber feedings
+                            Restore feedings
 
                         _ ->
-                            NoOp
+                            NoOp ()
                 )
             |> Effects.task

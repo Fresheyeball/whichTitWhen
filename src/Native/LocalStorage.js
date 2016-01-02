@@ -30,6 +30,7 @@ var make = function make(localRuntime) {
                 'set': F2(function (key, values) {
                     return Taskø1.asyncFunction(function (callback) {
                         return (function () {
+                            console.log('native set', key, value);
                             localStorage.setItem(key, value);
                             return callback(Taskø1.succeed(Tuple0ø1));
                         })();
