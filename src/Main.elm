@@ -45,7 +45,7 @@ update mf feedings =
                             List.filter ((/=) feeding) feedings'
 
                         Clobber feedings'' ->
-                            feedings''
+                            Debug.log "feedings''" feedings''
 
                 _ ->
                     feedings'
