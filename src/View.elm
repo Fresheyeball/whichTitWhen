@@ -39,11 +39,21 @@ css =
             ]
 
 
-renderFeeding : Feeding -> Html
-renderFeeding ( date, action ) =
+viewport : Html
+viewport =
+    node
+        "meta"
+        [ Attr.name "viewport"
+        , Attr.content "width=device-width, initial-scale=1"
+        ]
+        []
+
+
+renderFeeding : Address Action -> Feeding -> Html
+renderFeeding address ( time, lactation ) =
     let
         ( message, icon ) =
-            case action of
+            case lactation of
                 LeftBreast ->
                     ( "Left", "caret left" )
 
@@ -67,12 +77,21 @@ renderFeeding ( date, action ) =
                 ]
             , td
                 []
-                [ text <| format "%d/%m/%Y %I:%M %P" <| Date.fromTime date ]
+                [ text <| format "%d/%m/%Y %I:%M %P" <| Date.fromTime time ]
+            , td
+                [ Attr.class "collapsing" ]
+                [ i
+                    [ Attr.class <| "icon x"
+                    , Attr.style [ ( "cursor", "pointer" ) ]
+                    , Evt.onClick address (Delete ( time, lactation ))
+                    ]
+                    []
+                ]
             ]
 
 
-renderFeedings : List Feeding -> Html
-renderFeedings feedings =
+renderFeedings : Address Action -> List Feeding -> Html
+renderFeedings address feedings =
     div
         [ Attr.class "ui main text container"
         , Attr.style [ ( "margin-top", "50px" ) ]
@@ -81,7 +100,7 @@ renderFeedings feedings =
             [ Attr.class "ui celled striped table" ]
             [ tbody
                 []
-                (List.map renderFeeding feedings)
+                (List.map (renderFeeding address) feedings)
             ]
         ]
 
@@ -169,8 +188,9 @@ view : Address Action -> Model -> Html
 view address { feedings, time } =
     div
         []
-        [ css
+        [ viewport
+        , css
         , toolBar address
-        , renderFeedings feedings
+        , renderFeedings address feedings
         , timer (since feedings time)
         ]

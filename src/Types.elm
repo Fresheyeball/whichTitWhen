@@ -18,6 +18,7 @@ type Action
     = Add Lactation
     | Tick Time.Time
     | Restore (List Feeding)
+    | Delete Feeding
     | NoOp
 
 

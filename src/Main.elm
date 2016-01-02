@@ -20,6 +20,9 @@ update action { feedings, time } =
                 Add lactation ->
                     ( time', lactation ) :: feedings
 
+                Delete feeding ->
+                    List.filter ((/=) feeding) feedings
+
                 Restore feedingsFromStorage ->
                     feedingsFromStorage
 
@@ -42,7 +45,10 @@ update action { feedings, time } =
         effects' =
             case action of
                 Add _ ->
-                    Persist.save (.feedings model')
+                    Persist.save feedings'
+
+                Delete _ ->
+                    Persist.save feedings'
 
                 _ ->
                     Effects.none
