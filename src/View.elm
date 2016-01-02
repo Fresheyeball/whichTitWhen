@@ -111,9 +111,7 @@ timer : Time.Time -> Html
 timer time =
     let
         showTime =
-            floor
-                >> clamp 0 100
-                >> toString
+            toString
                 >> \i ->
                     if String.length i < 2 then
                         "0" ++ i
@@ -124,11 +122,11 @@ timer time =
             String.join
                 ":"
                 [ showTime
-                    (Time.inHours time)
+                    (floor (Time.inHours time) % 24)
                 , showTime
-                    (Time.inMinutes time)
+                    (floor (Time.inMinutes time) % 60)
                 , showTime
-                    (Time.inSeconds time)
+                    (floor (Time.inSeconds time) % 60)
                 ]
 
         style =
