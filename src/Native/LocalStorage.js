@@ -22,22 +22,17 @@ var make = function make(localRuntime) {
                     return Taskø1.asyncFunction(function (callback) {
                         return function () {
                             var xø1 = localStorage.getItem(key);
-                            callback(xø1 == null ? Taskø1.fail('Key not found') : void 0);
-                            return Taskø1.succeed(xø1);
+                            return callback(xø1 == null ? Taskø1.fail('Key not found') : Taskø1.succeed(xø1));
                         }.call(this);
                     });
                 },
-                'set': F2(function (key, values) {
-                    return (function () {
-                        console.log('pre native set task');
-                        return Taskø1.asyncFunction(function (callback) {
-                            return (function () {
-                                console.log('native set', key, value);
-                                localStorage.setItem(key, value);
-                                return callback(Taskø1.succeed(Tuple0ø1));
-                            })();
-                        });
-                    })();
+                'set': F2(function (key, value) {
+                    return Taskø1.asyncFunction(function (callback) {
+                        return (function () {
+                            localStorage.setItem(key, value);
+                            return callback(Taskø1.succeed(Tuple0ø1));
+                        })();
+                    });
                 })
             };
         })();

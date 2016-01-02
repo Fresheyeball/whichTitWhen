@@ -8,7 +8,8 @@ import List
 import Types exposing (..)
 import StartApp
 import Persist
-import Effects exposing (Effects)
+import Task exposing (Task)
+import Effects exposing (Effects, Never)
 
 
 update : Action -> Model -> ( Model, Effects Action )
@@ -68,6 +69,11 @@ app =
         , update = update
         , inputs = [ everySecond ]
         }
+
+
+port tasks : Signal (Task.Task Never ())
+port tasks =
+    app.tasks
 
 
 main : Signal Html
