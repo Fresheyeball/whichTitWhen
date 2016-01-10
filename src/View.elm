@@ -71,13 +71,22 @@ renderFeeding address ( time, lactation ) =
                     ( "Right", "caret right" )
 
                 Bottle ->
-                    ( "Bottle", "caret up" )
+                    ( "Bottle", "circle thin" )
 
-                Done ->
-                    ( "Finished", "star" )
+                DoneFeeding ->
+                    ( "Feed", "star" )
+
+                Poo ->
+                    ( "Poo", "sort descending" )
+
+                Pee ->
+                    ( "Pee", "sort ascending" )
+
+                PooAndPee ->
+                    ( "Poo & Pee", "sort" )
     in
         tr
-            [ Attr.style [ ( "background", lactationColor lactation ), ( "color", "white" ) ] ]
+            [ Attr.style [ ( "background", eventColor lactation ), ( "color", "white" ) ] ]
             [ td
                 [ Attr.class "collapsing" ]
                 [ i
@@ -104,10 +113,10 @@ renderFeedings : Address Action -> List Feeding -> Html
 renderFeedings address feedings =
     div
         [ Attr.class "ui main text container"
-        , Attr.style [ ( "margin-top", "50px" ) ]
+        , Attr.style [ ( "margin-top", "65px" ) ]
         ]
         [ table
-            [ Attr.class "ui celled striped table" ]
+            [ Attr.class "ui celled striped table unstackable" ]
             [ tbody
                 []
                 (List.map (renderFeeding address) feedings)
@@ -115,8 +124,8 @@ renderFeedings address feedings =
         ]
 
 
-lactationColor : Lactation -> String
-lactationColor lac =
+eventColor : Event -> String
+eventColor lac =
     case lac of
         LeftBreast ->
             "#2185d0"
@@ -127,8 +136,17 @@ lactationColor lac =
         Bottle ->
             "#f2711c"
 
-        Done ->
+        DoneFeeding ->
             "#767676"
+
+        Pee ->
+            "#DEA90B"
+
+        Poo ->
+            "#653800"
+
+        PooAndPee ->
+            "#7B7825"
 
 
 toolBar : Address Action -> Html
@@ -137,19 +155,22 @@ toolBar address =
         tool text' lactation =
             div
                 [ Attr.class ("item inverted")
-                , Attr.style [ ( "color", "white" ), ( "background", lactationColor lactation ) ]
+                , Attr.style [ ( "color", "white" ), ( "background", eventColor lactation ) ]
                 , Evt.onClick address (Add lactation)
                 ]
                 [ text text' ]
     in
         div
-            [ Attr.class "ui four item fixed menu"
+            [ Attr.class "ui seven item fixed menu"
             , Attr.style [ ( "cursor", "pointer" ) ]
             ]
             [ tool "Left Breast" LeftBreast
             , tool "Right Breast" RightBreast
             , tool "Bottle" Bottle
-            , tool "Done" Done
+            , tool "Feed" DoneFeeding
+            , tool "Poo" Poo
+            , tool "Pee" Pee
+            , tool "Poo & Pee" PooAndPee
             ]
 
 
@@ -194,12 +215,12 @@ timer time =
 since : List Feeding -> Time.Time -> Time.Time
 since feedings now =
     let
-        lastDone =
+        lastDoneFeeding =
             let
                 f ( date, action ) mdone =
                     case mdone of
                         Nothing ->
-                            if action == Done then
+                            if action == DoneFeeding then
                                 Just date
                             else
                                 Nothing
@@ -209,7 +230,7 @@ since feedings now =
             in
                 List.foldl f Nothing
     in
-        now - Maybe.withDefault now (lastDone feedings)
+        now - Maybe.withDefault now (lastDoneFeeding feedings)
 
 
 view : Address Action -> Model -> Html

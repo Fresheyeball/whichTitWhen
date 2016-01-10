@@ -3,17 +3,17 @@ module Main (..) where
 import Check exposing (..)
 import Graphics.Element exposing (Element, show)
 import Check.Investigator exposing (..)
-import Types exposing (Lactation(..), Feeding)
+import Types exposing (Event(..), Feeding)
 import Random
 import Shrink exposing (Shrinker)
 import Lazy.List exposing (..)
 import Persist exposing (..)
 
 
-lactation : Investigator Lactation
+lactation : Investigator Event
 lactation =
     let
-        generator : Random.Generator Lactation
+        generator : Random.Generator Event
         generator =
             let
                 fromInt i =
@@ -27,14 +27,23 @@ lactation =
                         2 ->
                             Bottle
 
+                        3 ->
+                            DoneFeeding
+
+                        4 ->
+                            Poo
+
+                        5 ->
+                            Pee
+
                         _ ->
-                            Done
+                            PooAndPee
             in
                 Random.map
                     fromInt
                     (Random.int 0 3)
 
-        shrinker : Shrinker Lactation
+        shrinker : Shrinker Event
         shrinker lact =
             case lact of
                 LeftBreast ->
@@ -46,8 +55,17 @@ lactation =
                 Bottle ->
                     RightBreast ::: empty
 
-                Done ->
+                DoneFeeding ->
                     Bottle ::: empty
+
+                Pee ->
+                    DoneFeeding ::: empty
+
+                Poo ->
+                    Pee ::: empty
+
+                PooAndPee ->
+                    Poo ::: empty
     in
         investigator generator shrinker
 

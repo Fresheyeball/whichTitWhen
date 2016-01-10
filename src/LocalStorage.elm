@@ -11,23 +11,25 @@ type alias LocalStorage a =
     }
 
 
+getRaw : String -> Task String String
+getRaw =
+    Native.LocalStorage.get
+
+
 get : LocalStorage a -> Task String a
 get { key, decode } =
-    let
-        getRaw : String -> Task String String
-        getRaw = Native.LocalStorage.get
-    in
-        getRaw key
-            `andThen` (decode >> fromResult)
+    getRaw key
+        `andThen` (Debug.log "pre" >> decode >> Debug.log "post" >> fromResult)
+
+
+setRaw : String -> String -> Task x ()
+setRaw =
+    Native.LocalStorage.set
 
 
 set : LocalStorage a -> a -> Task x ()
 set { key, encode } =
-    let
-        setRaw : String -> String -> Task x ()
-        setRaw = Native.LocalStorage.set
-    in
-        encode >> setRaw key
+    encode >> setRaw key
 
 
 localStorage : String -> (String -> Result String a) -> (a -> String) -> LocalStorage a

@@ -3,19 +3,22 @@ module Types (..) where
 import Time
 
 
-type Lactation
+type Event
     = LeftBreast
     | RightBreast
     | Bottle
-    | Done
+    | Poo
+    | Pee
+    | PooAndPee
+    | DoneFeeding
 
 
 type alias Feeding =
-    ( Time.Time, Lactation )
+    ( Time.Time, Event )
 
 
 type Action
-    = Add Lactation
+    = Add Event
     | Tick Time.Time
     | Restore (List Feeding)
     | Delete Feeding

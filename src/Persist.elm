@@ -42,11 +42,20 @@ storage =
                         "Bottle" ->
                             Ok ( time, Bottle )
 
-                        "Done" ->
-                            Ok ( time, Done )
+                        "DoneFeeding" ->
+                            Ok ( time, DoneFeeding )
+
+                        "Poo" ->
+                            Ok ( time, Poo )
+
+                        "Pee" ->
+                            Ok ( time, Pee )
+
+                        "PooAndPee" ->
+                            Ok ( time, PooAndPee )
 
                         _ ->
-                            Err "Lactation Decode Failed"
+                            Err "Event Decode Failed"
 
                 feeding =
                     Json.Decode.customDecoder tup lactation
