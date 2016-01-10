@@ -5397,160 +5397,6 @@ Elm.Signal.make = function (_elm) {
                                ,message: message
                                ,forwardTo: forwardTo
                                ,Mailbox: Mailbox};
-};Elm.Native.Time = {};
-
-Elm.Native.Time.make = function(localRuntime)
-{
-	localRuntime.Native = localRuntime.Native || {};
-	localRuntime.Native.Time = localRuntime.Native.Time || {};
-	if (localRuntime.Native.Time.values)
-	{
-		return localRuntime.Native.Time.values;
-	}
-
-	var NS = Elm.Native.Signal.make(localRuntime);
-	var Maybe = Elm.Maybe.make(localRuntime);
-
-
-	// FRAMES PER SECOND
-
-	function fpsWhen(desiredFPS, isOn)
-	{
-		var msPerFrame = 1000 / desiredFPS;
-		var ticker = NS.input('fps-' + desiredFPS, null);
-
-		function notifyTicker()
-		{
-			localRuntime.notify(ticker.id, null);
-		}
-
-		function firstArg(x, y)
-		{
-			return x;
-		}
-
-		// input fires either when isOn changes, or when ticker fires.
-		// Its value is a tuple with the current timestamp, and the state of isOn
-		var input = NS.timestamp(A3(NS.map2, F2(firstArg), NS.dropRepeats(isOn), ticker));
-
-		var initialState = {
-			isOn: false,
-			time: localRuntime.timer.programStart,
-			delta: 0
-		};
-
-		var timeoutId;
-
-		function update(input, state)
-		{
-			var currentTime = input._0;
-			var isOn = input._1;
-			var wasOn = state.isOn;
-			var previousTime = state.time;
-
-			if (isOn)
-			{
-				timeoutId = localRuntime.setTimeout(notifyTicker, msPerFrame);
-			}
-			else if (wasOn)
-			{
-				clearTimeout(timeoutId);
-			}
-
-			return {
-				isOn: isOn,
-				time: currentTime,
-				delta: (isOn && !wasOn) ? 0 : currentTime - previousTime
-			};
-		}
-
-		return A2(
-			NS.map,
-			function(state) { return state.delta; },
-			A3(NS.foldp, F2(update), update(input.value, initialState), input)
-		);
-	}
-
-
-	// EVERY
-
-	function every(t)
-	{
-		var ticker = NS.input('every-' + t, null);
-		function tellTime()
-		{
-			localRuntime.notify(ticker.id, null);
-		}
-		var clock = A2(NS.map, fst, NS.timestamp(ticker));
-		setInterval(tellTime, t);
-		return clock;
-	}
-
-
-	function fst(pair)
-	{
-		return pair._0;
-	}
-
-
-	function read(s)
-	{
-		var t = Date.parse(s);
-		return isNaN(t) ? Maybe.Nothing : Maybe.Just(t);
-	}
-
-	return localRuntime.Native.Time.values = {
-		fpsWhen: F2(fpsWhen),
-		every: every,
-		toDate: function(t) { return new Date(t); },
-		read: read
-	};
-};
-Elm.Time = Elm.Time || {};
-Elm.Time.make = function (_elm) {
-   "use strict";
-   _elm.Time = _elm.Time || {};
-   if (_elm.Time.values) return _elm.Time.values;
-   var _U = Elm.Native.Utils.make(_elm),
-   $Basics = Elm.Basics.make(_elm),
-   $Native$Signal = Elm.Native.Signal.make(_elm),
-   $Native$Time = Elm.Native.Time.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
-   var _op = {};
-   var delay = $Native$Signal.delay;
-   var since = F2(function (time,signal) {
-      var stop = A2($Signal.map,$Basics.always(-1),A2(delay,time,signal));
-      var start = A2($Signal.map,$Basics.always(1),signal);
-      var delaydiff = A3($Signal.foldp,F2(function (x,y) {    return x + y;}),0,A2($Signal.merge,start,stop));
-      return A2($Signal.map,F2(function (x,y) {    return !_U.eq(x,y);})(0),delaydiff);
-   });
-   var timestamp = $Native$Signal.timestamp;
-   var every = $Native$Time.every;
-   var fpsWhen = $Native$Time.fpsWhen;
-   var fps = function (targetFrames) {    return A2(fpsWhen,targetFrames,$Signal.constant(true));};
-   var inMilliseconds = function (t) {    return t;};
-   var millisecond = 1;
-   var second = 1000 * millisecond;
-   var minute = 60 * second;
-   var hour = 60 * minute;
-   var inHours = function (t) {    return t / hour;};
-   var inMinutes = function (t) {    return t / minute;};
-   var inSeconds = function (t) {    return t / second;};
-   return _elm.Time.values = {_op: _op
-                             ,millisecond: millisecond
-                             ,second: second
-                             ,minute: minute
-                             ,hour: hour
-                             ,inMilliseconds: inMilliseconds
-                             ,inSeconds: inSeconds
-                             ,inMinutes: inMinutes
-                             ,inHours: inHours
-                             ,fps: fps
-                             ,fpsWhen: fpsWhen
-                             ,every: every
-                             ,timestamp: timestamp
-                             ,delay: delay
-                             ,since: since};
 };Elm.Native.Array = {};
 Elm.Native.Array.make = function(localRuntime) {
 
@@ -6643,114 +6489,6 @@ Elm.Char.make = function (_elm) {
                              ,toLocaleLower: toLocaleLower
                              ,toCode: toCode
                              ,fromCode: fromCode};
-};Elm.Native.Date = {};
-Elm.Native.Date.make = function(localRuntime) {
-	localRuntime.Native = localRuntime.Native || {};
-	localRuntime.Native.Date = localRuntime.Native.Date || {};
-	if (localRuntime.Native.Date.values)
-	{
-		return localRuntime.Native.Date.values;
-	}
-
-	var Result = Elm.Result.make(localRuntime);
-
-	function readDate(str)
-	{
-		var date = new Date(str);
-		return isNaN(date.getTime())
-			? Result.Err('unable to parse \'' + str + '\' as a date')
-			: Result.Ok(date);
-	}
-
-	var dayTable = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-	var monthTable =
-		['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-		 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-
-	return localRuntime.Native.Date.values = {
-		read: readDate,
-		year: function(d) { return d.getFullYear(); },
-		month: function(d) { return { ctor: monthTable[d.getMonth()] }; },
-		day: function(d) { return d.getDate(); },
-		hour: function(d) { return d.getHours(); },
-		minute: function(d) { return d.getMinutes(); },
-		second: function(d) { return d.getSeconds(); },
-		millisecond: function(d) { return d.getMilliseconds(); },
-		toTime: function(d) { return d.getTime(); },
-		fromTime: function(t) { return new Date(t); },
-		dayOfWeek: function(d) { return { ctor: dayTable[d.getDay()] }; }
-	};
-};
-Elm.Date = Elm.Date || {};
-Elm.Date.make = function (_elm) {
-   "use strict";
-   _elm.Date = _elm.Date || {};
-   if (_elm.Date.values) return _elm.Date.values;
-   var _U = Elm.Native.Utils.make(_elm),$Native$Date = Elm.Native.Date.make(_elm),$Result = Elm.Result.make(_elm),$Time = Elm.Time.make(_elm);
-   var _op = {};
-   var millisecond = $Native$Date.millisecond;
-   var second = $Native$Date.second;
-   var minute = $Native$Date.minute;
-   var hour = $Native$Date.hour;
-   var dayOfWeek = $Native$Date.dayOfWeek;
-   var day = $Native$Date.day;
-   var month = $Native$Date.month;
-   var year = $Native$Date.year;
-   var fromTime = $Native$Date.fromTime;
-   var toTime = $Native$Date.toTime;
-   var fromString = $Native$Date.read;
-   var Dec = {ctor: "Dec"};
-   var Nov = {ctor: "Nov"};
-   var Oct = {ctor: "Oct"};
-   var Sep = {ctor: "Sep"};
-   var Aug = {ctor: "Aug"};
-   var Jul = {ctor: "Jul"};
-   var Jun = {ctor: "Jun"};
-   var May = {ctor: "May"};
-   var Apr = {ctor: "Apr"};
-   var Mar = {ctor: "Mar"};
-   var Feb = {ctor: "Feb"};
-   var Jan = {ctor: "Jan"};
-   var Sun = {ctor: "Sun"};
-   var Sat = {ctor: "Sat"};
-   var Fri = {ctor: "Fri"};
-   var Thu = {ctor: "Thu"};
-   var Wed = {ctor: "Wed"};
-   var Tue = {ctor: "Tue"};
-   var Mon = {ctor: "Mon"};
-   var Date = {ctor: "Date"};
-   return _elm.Date.values = {_op: _op
-                             ,fromString: fromString
-                             ,toTime: toTime
-                             ,fromTime: fromTime
-                             ,year: year
-                             ,month: month
-                             ,day: day
-                             ,dayOfWeek: dayOfWeek
-                             ,hour: hour
-                             ,minute: minute
-                             ,second: second
-                             ,millisecond: millisecond
-                             ,Jan: Jan
-                             ,Feb: Feb
-                             ,Mar: Mar
-                             ,Apr: Apr
-                             ,May: May
-                             ,Jun: Jun
-                             ,Jul: Jul
-                             ,Aug: Aug
-                             ,Sep: Sep
-                             ,Oct: Oct
-                             ,Nov: Nov
-                             ,Dec: Dec
-                             ,Mon: Mon
-                             ,Tue: Tue
-                             ,Wed: Wed
-                             ,Thu: Thu
-                             ,Fri: Fri
-                             ,Sat: Sat
-                             ,Sun: Sun};
 };Elm.Native.String = {};
 
 Elm.Native.String.make = function(localRuntime) {
@@ -8357,6 +8095,268 @@ Elm.Json.Decode.make = function (_elm) {
                                     ,andThen: andThen
                                     ,value: value
                                     ,customDecoder: customDecoder};
+};Elm.Native.Date = {};
+Elm.Native.Date.make = function(localRuntime) {
+	localRuntime.Native = localRuntime.Native || {};
+	localRuntime.Native.Date = localRuntime.Native.Date || {};
+	if (localRuntime.Native.Date.values)
+	{
+		return localRuntime.Native.Date.values;
+	}
+
+	var Result = Elm.Result.make(localRuntime);
+
+	function readDate(str)
+	{
+		var date = new Date(str);
+		return isNaN(date.getTime())
+			? Result.Err('unable to parse \'' + str + '\' as a date')
+			: Result.Ok(date);
+	}
+
+	var dayTable = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+	var monthTable =
+		['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+		 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+
+	return localRuntime.Native.Date.values = {
+		read: readDate,
+		year: function(d) { return d.getFullYear(); },
+		month: function(d) { return { ctor: monthTable[d.getMonth()] }; },
+		day: function(d) { return d.getDate(); },
+		hour: function(d) { return d.getHours(); },
+		minute: function(d) { return d.getMinutes(); },
+		second: function(d) { return d.getSeconds(); },
+		millisecond: function(d) { return d.getMilliseconds(); },
+		toTime: function(d) { return d.getTime(); },
+		fromTime: function(t) { return new Date(t); },
+		dayOfWeek: function(d) { return { ctor: dayTable[d.getDay()] }; }
+	};
+};
+Elm.Native.Time = {};
+
+Elm.Native.Time.make = function(localRuntime)
+{
+	localRuntime.Native = localRuntime.Native || {};
+	localRuntime.Native.Time = localRuntime.Native.Time || {};
+	if (localRuntime.Native.Time.values)
+	{
+		return localRuntime.Native.Time.values;
+	}
+
+	var NS = Elm.Native.Signal.make(localRuntime);
+	var Maybe = Elm.Maybe.make(localRuntime);
+
+
+	// FRAMES PER SECOND
+
+	function fpsWhen(desiredFPS, isOn)
+	{
+		var msPerFrame = 1000 / desiredFPS;
+		var ticker = NS.input('fps-' + desiredFPS, null);
+
+		function notifyTicker()
+		{
+			localRuntime.notify(ticker.id, null);
+		}
+
+		function firstArg(x, y)
+		{
+			return x;
+		}
+
+		// input fires either when isOn changes, or when ticker fires.
+		// Its value is a tuple with the current timestamp, and the state of isOn
+		var input = NS.timestamp(A3(NS.map2, F2(firstArg), NS.dropRepeats(isOn), ticker));
+
+		var initialState = {
+			isOn: false,
+			time: localRuntime.timer.programStart,
+			delta: 0
+		};
+
+		var timeoutId;
+
+		function update(input, state)
+		{
+			var currentTime = input._0;
+			var isOn = input._1;
+			var wasOn = state.isOn;
+			var previousTime = state.time;
+
+			if (isOn)
+			{
+				timeoutId = localRuntime.setTimeout(notifyTicker, msPerFrame);
+			}
+			else if (wasOn)
+			{
+				clearTimeout(timeoutId);
+			}
+
+			return {
+				isOn: isOn,
+				time: currentTime,
+				delta: (isOn && !wasOn) ? 0 : currentTime - previousTime
+			};
+		}
+
+		return A2(
+			NS.map,
+			function(state) { return state.delta; },
+			A3(NS.foldp, F2(update), update(input.value, initialState), input)
+		);
+	}
+
+
+	// EVERY
+
+	function every(t)
+	{
+		var ticker = NS.input('every-' + t, null);
+		function tellTime()
+		{
+			localRuntime.notify(ticker.id, null);
+		}
+		var clock = A2(NS.map, fst, NS.timestamp(ticker));
+		setInterval(tellTime, t);
+		return clock;
+	}
+
+
+	function fst(pair)
+	{
+		return pair._0;
+	}
+
+
+	function read(s)
+	{
+		var t = Date.parse(s);
+		return isNaN(t) ? Maybe.Nothing : Maybe.Just(t);
+	}
+
+	return localRuntime.Native.Time.values = {
+		fpsWhen: F2(fpsWhen),
+		every: every,
+		toDate: function(t) { return new Date(t); },
+		read: read
+	};
+};
+Elm.Time = Elm.Time || {};
+Elm.Time.make = function (_elm) {
+   "use strict";
+   _elm.Time = _elm.Time || {};
+   if (_elm.Time.values) return _elm.Time.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Native$Signal = Elm.Native.Signal.make(_elm),
+   $Native$Time = Elm.Native.Time.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var _op = {};
+   var delay = $Native$Signal.delay;
+   var since = F2(function (time,signal) {
+      var stop = A2($Signal.map,$Basics.always(-1),A2(delay,time,signal));
+      var start = A2($Signal.map,$Basics.always(1),signal);
+      var delaydiff = A3($Signal.foldp,F2(function (x,y) {    return x + y;}),0,A2($Signal.merge,start,stop));
+      return A2($Signal.map,F2(function (x,y) {    return !_U.eq(x,y);})(0),delaydiff);
+   });
+   var timestamp = $Native$Signal.timestamp;
+   var every = $Native$Time.every;
+   var fpsWhen = $Native$Time.fpsWhen;
+   var fps = function (targetFrames) {    return A2(fpsWhen,targetFrames,$Signal.constant(true));};
+   var inMilliseconds = function (t) {    return t;};
+   var millisecond = 1;
+   var second = 1000 * millisecond;
+   var minute = 60 * second;
+   var hour = 60 * minute;
+   var inHours = function (t) {    return t / hour;};
+   var inMinutes = function (t) {    return t / minute;};
+   var inSeconds = function (t) {    return t / second;};
+   return _elm.Time.values = {_op: _op
+                             ,millisecond: millisecond
+                             ,second: second
+                             ,minute: minute
+                             ,hour: hour
+                             ,inMilliseconds: inMilliseconds
+                             ,inSeconds: inSeconds
+                             ,inMinutes: inMinutes
+                             ,inHours: inHours
+                             ,fps: fps
+                             ,fpsWhen: fpsWhen
+                             ,every: every
+                             ,timestamp: timestamp
+                             ,delay: delay
+                             ,since: since};
+};Elm.Date = Elm.Date || {};
+Elm.Date.make = function (_elm) {
+   "use strict";
+   _elm.Date = _elm.Date || {};
+   if (_elm.Date.values) return _elm.Date.values;
+   var _U = Elm.Native.Utils.make(_elm),$Native$Date = Elm.Native.Date.make(_elm),$Result = Elm.Result.make(_elm),$Time = Elm.Time.make(_elm);
+   var _op = {};
+   var millisecond = $Native$Date.millisecond;
+   var second = $Native$Date.second;
+   var minute = $Native$Date.minute;
+   var hour = $Native$Date.hour;
+   var dayOfWeek = $Native$Date.dayOfWeek;
+   var day = $Native$Date.day;
+   var month = $Native$Date.month;
+   var year = $Native$Date.year;
+   var fromTime = $Native$Date.fromTime;
+   var toTime = $Native$Date.toTime;
+   var fromString = $Native$Date.read;
+   var Dec = {ctor: "Dec"};
+   var Nov = {ctor: "Nov"};
+   var Oct = {ctor: "Oct"};
+   var Sep = {ctor: "Sep"};
+   var Aug = {ctor: "Aug"};
+   var Jul = {ctor: "Jul"};
+   var Jun = {ctor: "Jun"};
+   var May = {ctor: "May"};
+   var Apr = {ctor: "Apr"};
+   var Mar = {ctor: "Mar"};
+   var Feb = {ctor: "Feb"};
+   var Jan = {ctor: "Jan"};
+   var Sun = {ctor: "Sun"};
+   var Sat = {ctor: "Sat"};
+   var Fri = {ctor: "Fri"};
+   var Thu = {ctor: "Thu"};
+   var Wed = {ctor: "Wed"};
+   var Tue = {ctor: "Tue"};
+   var Mon = {ctor: "Mon"};
+   var Date = {ctor: "Date"};
+   return _elm.Date.values = {_op: _op
+                             ,fromString: fromString
+                             ,toTime: toTime
+                             ,fromTime: fromTime
+                             ,year: year
+                             ,month: month
+                             ,day: day
+                             ,dayOfWeek: dayOfWeek
+                             ,hour: hour
+                             ,minute: minute
+                             ,second: second
+                             ,millisecond: millisecond
+                             ,Jan: Jan
+                             ,Feb: Feb
+                             ,Mar: Mar
+                             ,Apr: Apr
+                             ,May: May
+                             ,Jun: Jun
+                             ,Jul: Jul
+                             ,Aug: Aug
+                             ,Sep: Sep
+                             ,Oct: Oct
+                             ,Nov: Nov
+                             ,Dec: Dec
+                             ,Mon: Mon
+                             ,Tue: Tue
+                             ,Wed: Wed
+                             ,Thu: Thu
+                             ,Fri: Fri
+                             ,Sat: Sat
+                             ,Sun: Sun};
 };Elm.Native.Regex = {};
 Elm.Native.Regex.make = function(localRuntime) {
 	localRuntime.Native = localRuntime.Native || {};
@@ -10992,7 +10992,8 @@ Elm.Date.Format.make = function (_elm) {
    });
    var re = $Regex.regex("(^|[^%])%(Y|m|B|b|d|e|a|A|H|k|I|l|p|P|M|S)");
    var format = F2(function (s,d) {    return A4($Regex.replace,$Regex.All,re,formatToken(d),s);});
-   return _elm.Date.Format.values = {_op: _op,format: format};
+   var formatISO8601 = format("%Y-%m-%dT%H:%M:%SZ");
+   return _elm.Date.Format.values = {_op: _op,format: format,formatISO8601: formatISO8601};
 };window.foreign = {
     'sanitize': function (record) {
         var spaces = Array.prototype.slice.call(arguments, 1);
@@ -11049,9 +11050,16 @@ Elm.LocalStorage.make = function (_elm) {
    $Signal = Elm.Signal.make(_elm),
    $Task = Elm.Task.make(_elm);
    var _op = {};
-   var set = $Native$LocalStorage.set;
-   var get = $Native$LocalStorage.get;
-   return _elm.LocalStorage.values = {_op: _op,get: get,set: set};
+   var localStorage = F3(function (key,decode,encode) {    return {key: key,decode: decode,encode: encode};});
+   var setRaw = $Native$LocalStorage.set;
+   var set = function (_p0) {    var _p1 = _p0;return function (_p2) {    return A2(setRaw,_p1.key,_p1.encode(_p2));};};
+   var getRaw = $Native$LocalStorage.get;
+   var get = function (_p3) {
+      var _p4 = _p3;
+      return A2($Task.andThen,getRaw(_p4.key),function (_p5) {    return $Task.fromResult(A2($Debug.log,"post",_p4.decode(A2($Debug.log,"pre",_p5))));});
+   };
+   var LocalStorage = F3(function (a,b,c) {    return {key: a,decode: b,encode: c};});
+   return _elm.LocalStorage.values = {_op: _op,LocalStorage: LocalStorage,getRaw: getRaw,get: get,setRaw: setRaw,set: set,localStorage: localStorage};
 };Elm.Types = Elm.Types || {};
 Elm.Types.make = function (_elm) {
    "use strict";
@@ -11072,7 +11080,10 @@ Elm.Types.make = function (_elm) {
    var Restore = function (a) {    return {ctor: "Restore",_0: a};};
    var Tick = function (a) {    return {ctor: "Tick",_0: a};};
    var Add = function (a) {    return {ctor: "Add",_0: a};};
-   var Done = {ctor: "Done"};
+   var DoneFeeding = {ctor: "DoneFeeding"};
+   var PooAndPee = {ctor: "PooAndPee"};
+   var Pee = {ctor: "Pee"};
+   var Poo = {ctor: "Poo"};
    var Bottle = {ctor: "Bottle"};
    var RightBreast = {ctor: "RightBreast"};
    var LeftBreast = {ctor: "LeftBreast"};
@@ -11080,7 +11091,10 @@ Elm.Types.make = function (_elm) {
                               ,LeftBreast: LeftBreast
                               ,RightBreast: RightBreast
                               ,Bottle: Bottle
-                              ,Done: Done
+                              ,Poo: Poo
+                              ,Pee: Pee
+                              ,PooAndPee: PooAndPee
+                              ,DoneFeeding: DoneFeeding
                               ,Add: Add
                               ,Tick: Tick
                               ,Restore: Restore
@@ -11109,19 +11123,19 @@ Elm.View.make = function (_elm) {
    $Types = Elm.Types.make(_elm);
    var _op = {};
    var since = F2(function (feedings,now) {
-      var lastDone = function () {
+      var lastDoneFeeding = function () {
          var f = F2(function (_p0,mdone) {
             var _p1 = _p0;
             var _p2 = mdone;
             if (_p2.ctor === "Nothing") {
-                  return _U.eq(_p1._1,$Types.Done) ? $Maybe.Just(_p1._0) : $Maybe.Nothing;
+                  return _U.eq(_p1._1,$Types.DoneFeeding) ? $Maybe.Just(_p1._0) : $Maybe.Nothing;
                } else {
                   return mdone;
                }
          });
          return A2($List.foldl,f,$Maybe.Nothing);
       }();
-      return now - A2($Maybe.withDefault,now,lastDone(feedings));
+      return now - A2($Maybe.withDefault,now,lastDoneFeeding(feedings));
    });
    var timer = function (time) {
       var style = _U.list([{ctor: "_Tuple2",_0: "bottom",_1: "0"}
@@ -11137,28 +11151,34 @@ Elm.View.make = function (_elm) {
       var formated = A2($String.join,":",_U.list([A2(showTime,$Time.inHours,24),A2(showTime,$Time.inMinutes,60),A2(showTime,$Time.inSeconds,60)]));
       return A2($Html.div,_U.list([$Html$Attributes.$class("ui item header"),$Html$Attributes.style(style)]),_U.list([$Html.text(formated)]));
    };
-   var lactationColor = function (lac) {
+   var eventColor = function (lac) {
       var _p3 = lac;
       switch (_p3.ctor)
       {case "LeftBreast": return "#2185d0";
          case "RightBreast": return "#a333c8";
          case "Bottle": return "#f2711c";
-         default: return "#767676";}
+         case "DoneFeeding": return "#767676";
+         case "Pee": return "#DEA90B";
+         case "Poo": return "#653800";
+         default: return "#7B7825";}
    };
    var toolBar = function (address) {
       var tool = F2(function (text$,lactation) {
          return A2($Html.div,
          _U.list([$Html$Attributes.$class("item inverted")
-                 ,$Html$Attributes.style(_U.list([{ctor: "_Tuple2",_0: "color",_1: "white"},{ctor: "_Tuple2",_0: "background",_1: lactationColor(lactation)}]))
+                 ,$Html$Attributes.style(_U.list([{ctor: "_Tuple2",_0: "color",_1: "white"},{ctor: "_Tuple2",_0: "background",_1: eventColor(lactation)}]))
                  ,A2($Html$Events.onClick,address,$Types.Add(lactation))]),
          _U.list([$Html.text(text$)]));
       });
       return A2($Html.div,
-      _U.list([$Html$Attributes.$class("ui four item fixed menu"),$Html$Attributes.style(_U.list([{ctor: "_Tuple2",_0: "cursor",_1: "pointer"}]))]),
+      _U.list([$Html$Attributes.$class("ui seven item fixed menu"),$Html$Attributes.style(_U.list([{ctor: "_Tuple2",_0: "cursor",_1: "pointer"}]))]),
       _U.list([A2(tool,"Left Breast",$Types.LeftBreast)
               ,A2(tool,"Right Breast",$Types.RightBreast)
               ,A2(tool,"Bottle",$Types.Bottle)
-              ,A2(tool,"Done",$Types.Done)]));
+              ,A2(tool,"Feed",$Types.DoneFeeding)
+              ,A2(tool,"Poo",$Types.Poo)
+              ,A2(tool,"Pee",$Types.Pee)
+              ,A2(tool,"Poo & Pee",$Types.PooAndPee)]));
    };
    var renderFeeding = F2(function (address,_p4) {
       var _p5 = _p4;
@@ -11169,13 +11189,16 @@ Elm.View.make = function (_elm) {
          switch (_p7.ctor)
          {case "LeftBreast": return {ctor: "_Tuple2",_0: "Left",_1: "caret left"};
             case "RightBreast": return {ctor: "_Tuple2",_0: "Right",_1: "caret right"};
-            case "Bottle": return {ctor: "_Tuple2",_0: "Bottle",_1: "caret up"};
-            default: return {ctor: "_Tuple2",_0: "Finished",_1: "star"};}
+            case "Bottle": return {ctor: "_Tuple2",_0: "Bottle",_1: "circle thin"};
+            case "DoneFeeding": return {ctor: "_Tuple2",_0: "Feed",_1: "star"};
+            case "Poo": return {ctor: "_Tuple2",_0: "Poo",_1: "sort descending"};
+            case "Pee": return {ctor: "_Tuple2",_0: "Pee",_1: "sort ascending"};
+            default: return {ctor: "_Tuple2",_0: "Poo & Pee",_1: "sort"};}
       }();
       var message = _p6._0;
       var icon = _p6._1;
       return A2($Html.tr,
-      _U.list([$Html$Attributes.style(_U.list([{ctor: "_Tuple2",_0: "background",_1: lactationColor(_p8)},{ctor: "_Tuple2",_0: "color",_1: "white"}]))]),
+      _U.list([$Html$Attributes.style(_U.list([{ctor: "_Tuple2",_0: "background",_1: eventColor(_p8)},{ctor: "_Tuple2",_0: "color",_1: "white"}]))]),
       _U.list([A2($Html.td,
               _U.list([$Html$Attributes.$class("collapsing")]),
               _U.list([A2($Html.i,_U.list([$Html$Attributes.$class(A2($Basics._op["++"],"icon ",icon))]),_U.list([])),$Html.text(message)]))
@@ -11190,9 +11213,9 @@ Elm.View.make = function (_elm) {
    });
    var renderFeedings = F2(function (address,feedings) {
       return A2($Html.div,
-      _U.list([$Html$Attributes.$class("ui main text container"),$Html$Attributes.style(_U.list([{ctor: "_Tuple2",_0: "margin-top",_1: "50px"}]))]),
+      _U.list([$Html$Attributes.$class("ui main text container"),$Html$Attributes.style(_U.list([{ctor: "_Tuple2",_0: "margin-top",_1: "65px"}]))]),
       _U.list([A2($Html.table,
-      _U.list([$Html$Attributes.$class("ui celled striped table")]),
+      _U.list([$Html$Attributes.$class("ui celled striped table unstackable")]),
       _U.list([A2($Html.tbody,_U.list([]),A2($List.map,renderFeeding(address),feedings))]))]));
    });
    var meta = F2(function (name,content) {
@@ -11225,7 +11248,7 @@ Elm.View.make = function (_elm) {
                              ,mobile: mobile
                              ,renderFeeding: renderFeeding
                              ,renderFeedings: renderFeedings
-                             ,lactationColor: lactationColor
+                             ,eventColor: eventColor
                              ,toolBar: toolBar
                              ,timer: timer
                              ,since: since
@@ -11249,51 +11272,46 @@ Elm.Persist.make = function (_elm) {
    $Task = Elm.Task.make(_elm),
    $Types = Elm.Types.make(_elm);
    var _op = {};
-   var key = "whichTitWhen";
-   var save = function (feedings) {
-      _op["=>"] = F2(function (v0,v1) {    return {ctor: "_Tuple2",_0: v0,_1: v1};});
-      var feedings$ = function () {
-         var encodeFeeding = function (_p0) {
+   var storage = function () {
+      var decode = function () {
+         var lactation = function (_p0) {
             var _p1 = _p0;
-            return $Json$Encode.object(_U.list([A2(_op["=>"],"lactation",$Json$Encode.string($Basics.toString(_p1._1)))
-                                               ,A2(_op["=>"],"time",$Json$Encode.$float(_p1._0))]));
+            var _p3 = _p1._0;
+            var _p2 = _p1._1;
+            switch (_p2)
+            {case "LeftBreast": return $Result.Ok({ctor: "_Tuple2",_0: _p3,_1: $Types.LeftBreast});
+               case "RightBreast": return $Result.Ok({ctor: "_Tuple2",_0: _p3,_1: $Types.RightBreast});
+               case "Bottle": return $Result.Ok({ctor: "_Tuple2",_0: _p3,_1: $Types.Bottle});
+               case "DoneFeeding": return $Result.Ok({ctor: "_Tuple2",_0: _p3,_1: $Types.DoneFeeding});
+               case "Poo": return $Result.Ok({ctor: "_Tuple2",_0: _p3,_1: $Types.Poo});
+               case "Pee": return $Result.Ok({ctor: "_Tuple2",_0: _p3,_1: $Types.Pee});
+               case "PooAndPee": return $Result.Ok({ctor: "_Tuple2",_0: _p3,_1: $Types.PooAndPee});
+               default: return $Result.Err("Event Decode Failed");}
          };
-         return A2($Json$Encode.encode,0,$Json$Encode.list(A2($List.map,encodeFeeding,feedings)));
-      }();
-      return $Effects.task(A2($Task.map,$Basics.always($Types.NoOp),A2($LocalStorage.set,key,feedings$)));
-   };
-   var restore = function () {
-      var decodeFeeding = function () {
-         var decodeLactation = function (_p2) {
-            var _p3 = _p2;
-            var _p5 = _p3._0;
-            var _p4 = _p3._1;
-            switch (_p4)
-            {case "LeftBreast": return $Result.Ok({ctor: "_Tuple2",_0: _p5,_1: $Types.LeftBreast});
-               case "RightBreast": return $Result.Ok({ctor: "_Tuple2",_0: _p5,_1: $Types.RightBreast});
-               case "Bottle": return $Result.Ok({ctor: "_Tuple2",_0: _p5,_1: $Types.Bottle});
-               case "Done": return $Result.Ok({ctor: "_Tuple2",_0: _p5,_1: $Types.Done});
-               default: return $Result.Err("Lactation Decode Failed");}
-         };
-         var decodeTup = A3($Json$Decode.object2,
+         var tup = A3($Json$Decode.object2,
          F2(function (v0,v1) {    return {ctor: "_Tuple2",_0: v0,_1: v1};}),
          A2($Json$Decode._op[":="],"time",$Json$Decode.$float),
          A2($Json$Decode._op[":="],"lactation",$Json$Decode.string));
-         return A2($Json$Decode.customDecoder,decodeTup,decodeLactation);
+         var feeding = A2($Json$Decode.customDecoder,tup,lactation);
+         return $Json$Decode.decodeString($Json$Decode.list(feeding));
       }();
-      var decodeModel = $Json$Decode.decodeString($Json$Decode.list(decodeFeeding));
-      return $Effects.task(A2($Task.map,
-      function (result) {
-         var _p6 = A2($Result.andThen,result,decodeModel);
-         if (_p6.ctor === "Ok") {
-               return $Types.Restore(_p6._0);
-            } else {
-               return $Types.NoOp;
-            }
-      },
-      $Task.toResult($LocalStorage.get(key))));
+      var encode = function (string) {
+         var encodeFeeding = function (_p4) {
+            var _p5 = _p4;
+            return $Json$Encode.object(_U.list([{ctor: "_Tuple2",_0: "lactation",_1: $Json$Encode.string($Basics.toString(_p5._1))}
+                                               ,{ctor: "_Tuple2",_0: "time",_1: $Json$Encode.$float(_p5._0)}]));
+         };
+         return A2($Json$Encode.encode,0,$Json$Encode.list(A2($List.map,encodeFeeding,string)));
+      };
+      return A3($LocalStorage.LocalStorage,"whichTitWhen",decode,encode);
    }();
-   return _elm.Persist.values = {_op: _op,save: save,restore: restore};
+   var save = function (feedings) {    return $Effects.task(A2($Task.map,$Basics.always($Types.NoOp),A2($LocalStorage.set,storage,feedings)));};
+   var restore = $Effects.task(A2($Task.map,
+   function (_p6) {
+      return A2($Result.withDefault,$Types.NoOp,A2($Result.map,$Types.Restore,_p6));
+   },
+   $Task.toResult($LocalStorage.get(storage))));
+   return _elm.Persist.values = {_op: _op,save: save,restore: restore,storage: storage};
 };Elm.Main = Elm.Main || {};
 Elm.Main.make = function (_elm) {
    "use strict";
