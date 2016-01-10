@@ -1,4 +1,4 @@
-module Persist (save, restore) where
+module Persist (save, restore, storage) where
 
 import LocalStorage exposing (..)
 import Types exposing (..)
