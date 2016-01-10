@@ -1,18 +1,38 @@
 module LocalStorage (..) where
 
 import Native.LocalStorage
-import Task exposing (Task)
+import Task exposing (..)
 
 
-type alias Key =
-    String
+type alias LocalStorage a =
+    { key : String
+    , decode : String -> Result String a
+    , encode : a -> String
+    }
 
 
-get : Key -> Task String String
-get =
-    Native.LocalStorage.get
+get : LocalStorage a -> Task String a
+get { key, decode } =
+    let
+        getRaw : String -> Task String String
+        getRaw = Native.LocalStorage.get
+    in
+        getRaw key
+            `andThen` (decode >> fromResult)
 
 
-set : Key -> String -> Task x ()
-set =
-    Native.LocalStorage.set
+set : LocalStorage a -> a -> Task x ()
+set { key, encode } =
+    let
+        setRaw : String -> String -> Task x ()
+        setRaw = Native.LocalStorage.set
+    in
+        encode >> setRaw key
+
+
+localStorage : String -> (String -> Result String a) -> (a -> String) -> LocalStorage a
+localStorage key decode encode =
+    { key = key
+    , decode = decode
+    , encode = encode
+    }

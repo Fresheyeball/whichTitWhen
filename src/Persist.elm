@@ -1,6 +1,6 @@
 module Persist (save, restore) where
 
-import LocalStorage
+import LocalStorage exposing (..)
 import Types exposing (..)
 import Effects exposing (Effects)
 import Task
@@ -9,44 +9,29 @@ import Json.Decode exposing ((:=))
 import Result exposing (Result(..))
 
 
-key : LocalStorage.Key
-key =
-    "whichTitWhen"
-
-
-save : List Feeding -> Effects Action
-save feedings =
+storage : LocalStorage (List Feeding)
+storage =
     let
-        (=>) = (,)
-
-        feedings' =
+        encode string =
             let
                 encodeFeeding ( time, lactation ) =
                     Encode.object
-                        [ "lactation" => Encode.string (toString lactation)
-                        , "time" => Encode.float time
+                        [ ( "lactation", Encode.string (toString lactation) )
+                        , ( "time", Encode.float time )
                         ]
             in
-                Encode.list (List.map encodeFeeding feedings)
+                Encode.list (List.map encodeFeeding string)
                     |> Encode.encode 0
-    in
-        LocalStorage.set key feedings'
-            |> Task.map (always NoOp)
-            |> Effects.task
 
-
-restore : Effects Action
-restore =
-    let
-        decodeFeeding =
+        decode =
             let
-                decodeTup =
+                tup =
                     Json.Decode.object2
                         (,)
                         ("time" := Json.Decode.float)
                         ("lactation" := Json.Decode.string)
 
-                decodeLactation ( time, lactationString ) =
+                lactation ( time, lactationString ) =
                     case lactationString of
                         "LeftBreast" ->
                             Ok ( time, LeftBreast )
@@ -62,23 +47,26 @@ restore =
 
                         _ ->
                             Err "Lactation Decode Failed"
+
+                feeding =
+                    Json.Decode.customDecoder tup lactation
             in
-                Json.Decode.customDecoder
-                    decodeTup
-                    decodeLactation
-
-        decodeModel =
-            Json.Decode.list decodeFeeding
-                |> Json.Decode.decodeString
+                Json.Decode.list feeding
+                    |> Json.Decode.decodeString
     in
-        Task.toResult (LocalStorage.get key)
-            |> Task.map
-                (\result ->
-                    case result `Result.andThen` decodeModel of
-                        Ok feedings ->
-                            Restore feedings
+        LocalStorage "whichTitWhen" decode encode
 
-                        _ ->
-                            NoOp
-                )
-            |> Effects.task
+
+save : List Feeding -> Effects Action
+save feedings =
+    set storage feedings
+        |> Task.map (always NoOp)
+        |> Effects.task
+
+
+restore : Effects Action
+restore =
+    Task.toResult (get storage)
+        |> Task.map
+            (Result.map Restore >> Result.withDefault NoOp)
+        |> Effects.task
